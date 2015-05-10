@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load markdown_deux_tags %}
+{% block content %}
+
+{% if articles %}
+<ul class="articles">
+{% for article in articles %}
+  <li class="article">
+    <h2><a href="{% url 'articles:view' article.slug %}">{{ article.title }}</a></h2>
+    <div class="body">{{ article.body| markdown |truncatechars:100 }}</div>
+  </li>
+{% endfor %}
+</ul>
+{% else %}
+<p>No articles</p>
+{% endif %}
+{% endblock %}

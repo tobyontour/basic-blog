@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}{% if article %}Edit {{ article.title }}{% else %}New article{% endif %}{% endblock %}
+{% block page_title %}{% if article %}{{ article.title }}{% else %}New article{% endif %}{% endblock %}
+{% if article %}
+	{% if article.subheading %}
+	{% block page_subheading %}{{ article.subheading }}{% endblock %}
+	{% endif %}
+	{% block extra_heading %}<span class="meta">Posted on {{ article.created }}</span>{% endblock %}
+{% endif %}
+
+{% block content %}
+<div class="col-lg-2 col-md-1">
+  {% if user %}
+  <ul class="nav nav-pills nav-stacked">
+  	{% if image %}
+    <li><a href="{% url 'articles:image-view' image.pk %}">View</a></li>
+    <li class="active"><a href="{% url 'articles:image-edit' image.pk %}">Edit</a></li>
+    <li><a href="{% url 'articles:image-delete' image.pk %}">Delete</a></li>
+    {% endif %}
+    <li{% if not image %} class="active"{% endif %}><a href="{% url 'articles:image-new' %}">New</a></li>
+    <li><a href="{% url 'articles:image-list' %}">List</a></li>
+  </ul>
+  {% endif %}
+</div>
+
+<div class="col-lg-8 col-md-10 body">
+	{{ form.errors }}
+	<form role="form" method="post" enctype="multipart/form-data" action="{% if object %}{% url 'articles:image-edit' object.pk %}{% else %}{% url 'articles:image-new' %}{% endif %}">{% csrf_token %}
+	  {% bootstrap_form form layout='inline' %}
+	  {% buttons %}
+	    {% if object %}
+	    <a href="{% url 'articles:image-view' object.pk %}" class="btn"> Cancel </a>
+	    {% else %}
+	    <a href="{% url 'articles:list' %}" class="btn"> Cancel </a>
+	    {% endif %}
+	    <button type="submit" class="btn btn-primary">
+	      {% bootstrap_icon "ok" %} Submit
+	    </button>
+	  {% endbuttons %}
+	</form>
+</div>
+{% endblock %}
+

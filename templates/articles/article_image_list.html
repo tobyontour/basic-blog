@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% load markdown_deux_tags %}
+
+{% block title %}Article images{% endblock %}
+{% block page_title %}Article images{% endblock %}
+{% block page_subheading %}{% endblock %}
+{% block extra_heading %}{% endblock %}
+
+{% block content %}
+<div class="col-lg-2 col-md-1">
+  <ul class="nav nav-pills nav-stacked">
+    <li class="active"><a href="{% url 'articles:image-list' %}">List</a></li>
+    <li><a href="{% url 'articles:image-new' %}">New</a></li>
+  </ul>
+</div>
+{% if object_list %}
+<div class="col-lg-8 col-md-10">
+  {% for image in object_list %}
+    <div class="post-preview">
+      <a href="{% url 'articles:image-view' image.pk %}" class="">
+        <div class="col-lg-4 col-md-4">
+          <img src="{% thumbnail image.image "200x200" as im %}{{ im.url }}{% endthumbnail %}">
+        </div>
+        <div class=" col-lg-8 col-md-6">
+          <h2 class="post-title">
+            {{ image.pk }} - {{ image.title }}
+          </h2>
+          <p class="post-meta col-lg-12 col-md-12">Posted by <a href="#">{{ image.author }}</a> on {{ image.created }}</p>
+        </div>
+      </a>
+    </div>
+    <hr>
+  {% empty %}
+    <p>No images</p>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

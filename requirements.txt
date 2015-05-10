@@ -1,0 +1,13 @@
+markdown
+Django<1.9
+django-debug-toolbar
+django-debug-toolbar-template-timings
+selenium
+django-markdown-deux
+Pillow
+dropbox
+django-bootstrap3
+sorl-thumbnail
+django-braces
+django-versatileimagefield
+coverage

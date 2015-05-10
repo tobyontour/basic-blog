@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}Delete{% endblock %}
+{% block page_title %}Delete permanently?{% endblock %}
+{% block extra_heading %}<span class="meta">Posted on {{ image.created }}</span>{% endblock %}
+
+
+{% block content %}
+<div class="col-lg-2 col-md-1">
+  <ul class="nav nav-pills nav-stacked">
+    <li><a href="{% url 'articles:image-view' image.pk %}">View</a></li>
+    <li><a href="{% url 'articles:image-edit' image.pk %}">Edit</a></li>
+    <li class="active"><a href="{% url 'articles:image-delete' image.pk %}">Delete</a></li>
+    <li><a href="{% url 'articles:image-new' %}">New</a></li>
+    <li><a href="{% url 'articles:image-list' %}">List</a></li>
+  </ul>
+</div>
+<div class="col-lg-8 col-md-10 body">
+  <form class="form" action="" method="post">{% csrf_token %}
+    <p>Are you sure you want to delete "{{ image.title }}"?</p>
+    <a href="{% url 'articles:image-view' image.pk %}" class="btn"> Cancel </a>
+    <button type="submit" class="btn btn-primary btn-danger">
+      {% bootstrap_icon "remove" %} Delete
+    </button>
+  </form>
+</div>
+{% endblock %}

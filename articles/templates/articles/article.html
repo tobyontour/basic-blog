@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load markdown_deux_tags %}
+
+{% block content %}
+<h1>{{ article.title }}</h1>
+{% if article.image %}
+  <div class="lead-image"><img src="{{ article.image.url }}" /></div>
+{% endif %}
+<div class="body">{{ article.body |markdown }}</div>
+{% endblock %}
