@@ -1,5 +1,11 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}You have been logged out{% endblock %}
+{% block page_title %}You have been logged out{% endblock %}
 
 {% block content %}
+<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 body">
 <p>You have been logged out</p>
+</div>
 {% endblock %}
