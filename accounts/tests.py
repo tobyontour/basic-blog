@@ -1,18 +1,21 @@
 """
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
+Tests for user functions
 """
 
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.contrib.auth.models import User
 import django.core.mail
 import re
 
 
 class AccountsTest(TestCase):
-    fixtures = ['users.json']
+
+    def setUp(self):
+        user = User.objects.create_user('testuser', email='testuser@example.com', password='testuser')
+        user.first_name = 'John'
+        user.last_name = 'Doe'
+        user.save()
 
     def test_login(self):
         """
@@ -41,30 +44,44 @@ class AccountsTest(TestCase):
         Test that the username requirements for registering are enforced
         """
         response = self.client.post('/accounts/register',
-            data={'username': 't', 'password': 'testuser', 'email': 'qwerty@example.com'})
+            data={
+                'username': 'a',
+                'first_name': 'Steve',
+                'password1': 'tests',
+                'password2': 'tests',
+                'email': 'qwerty@example.com'
+            })
 
-        self.assertContains(response, 'errorlist')
-        self.assertContains(response, 'Ensure this value has at least 2 characters')
+        self.assertContains(response, 'Ensure this value has at least 3 characters')
 
     def test_username_restrictions_enforced_too_long(self):
         """
         Test that the username requirements for registering are enforced
         """
         response = self.client.post('/accounts/register',
-            data={'username': 'abcdefghi', 'password': 'testuser', 'email': 'qwerty@example.com'})
+            data={
+                'username': 'abcdefghijabcdefghijabcdefghijq',
+                'first_name': 'Steve',
+                'password1': 'tests',
+                'password2': 'tests',
+                'email': 'qwerty@example.com'
+            })
 
-        self.assertContains(response, 'errorlist')
-        self.assertContains(response, 'Ensure this value has at most 8 characters')
+        self.assertContains(response, 'Ensure this value has at most 30 characters')
 
     def test_username_restrictions_enforced_non_letter(self):
         """
         Test that the username requirements for registering are enforced
         """
         response = self.client.post('/accounts/register',
-            data={'username': 'abcd1234', 'password': 'testuser', 'email': 'qwerty@example.com'})
-
-        self.assertContains(response, 'errorlist')
-        self.assertContains(response, 'Enter a valid value')
+            data={
+                'username': 'abcd qwe',
+                'first_name': 'Steve',
+                'password1': 'tests',
+                'password2': 'tests',
+                'email': 'qwerty@example.com'
+            })
+        self.assertContains(response, 'Enter a valid username. This value may contain only letters, numbers')
 
     def test_email_restrictions_enforced(self):
         """
@@ -73,7 +90,6 @@ class AccountsTest(TestCase):
         response = self.client.post('/accounts/register',
             data={'username': 'abcd', 'password': 'testtest', 'email': 'qwertyrexample.com'})
 
-        self.assertContains(response, 'errorlist')
         self.assertContains(response, 'Enter a valid email address')
 
     def test_password_restrictions_enforced(self):
@@ -81,9 +97,14 @@ class AccountsTest(TestCase):
         Test that the username requirements for registering are enforced
         """
         response = self.client.post('/accounts/register',
-            data={'username': 'abcd', 'password': 'test', 'email': 'qwerty@example.com'})
+            data={
+                'username': 'abcd',
+                'first_name': 'Steve',
+                'password1': 'test',
+                'password2': 'test',
+                'email': 'qwerty@example.com'
+            })
 
-        self.assertContains(response, 'errorlist')
         self.assertContains(response, 'Ensure this value has at least 5 characters')
 
     def test_non_existent_user_cant_log_in(self):
@@ -104,14 +125,21 @@ class AccountsTest(TestCase):
         self.assertTrue('form' in response.context)
 
         response = self.client.post('/accounts/register',
-            data={'username': 'abcde', 'password': 'testtest', 'email': 'qwertyq@example.com'},
+            data={
+                'username': 'abcde', 
+                'first_name': 'Steve',
+                'password1': 'test1',
+                'password2': 'test1',
+                'email': 'qwerty@example.com'
+            },
             follow=True)
 
+        self.assertTemplateUsed(response, 'registration/login.html')
         self.assertContains(response, '/accounts/login')
         self.assertContains(response, 'login')
 
         response = self.client.post('/accounts/login/',
-            data={'username': 'abcde', 'password': 'testtest'},
+            data={'username': 'abcde', 'password': 'test1'},
             follow=True)
 
         self.assertTrue(response.status_code == 200)
@@ -120,33 +148,65 @@ class AccountsTest(TestCase):
 
     def test_register_user_duplicate_username(self):
         response = self.client.post('/accounts/register',
-            data={'username': 'abcde', 'password': 'testtest', 'email': 'qwerty@example.com'},
+            data={
+                'username': 'abcde', 
+                'first_name': 'Steve',
+                'password1': 'test1',
+                'password2': 'test1',
+                'email': 'qwerty@example.com'
+            },
             follow=True)
 
         response = self.client.post('/accounts/register',
-            data={'username': 'abcde', 'password': '12345678', 'email': '1qwerty@example.com'},
+            data={
+                'username': 'abcde', 
+                'first_name': 'Steve1',
+                'password1': 'test2',
+                'password2': 'test2',
+                'email': 'qwerty1@example.com'
+            },
+
             follow=True)
 
         self.assertTrue(response.status_code == 200)
-        self.assertContains(response, 'Username or email exists.')
+        self.assertContains(response, 'A user with that username already exists.')
 
     def test_register_user_duplicate_email(self):
         response = self.client.post('/accounts/register',
-            data={'username': 'abcde', 'password': 'testtest',  'email': 'qwerty@example.com'},
+            data={
+                'username': 'abcde', 
+                'first_name': 'Steve',
+                'password1': 'test1',
+                'password2': 'test1',
+                'email': 'qwerty@example.com'
+            },
             follow=True)
 
         response = self.client.post('/accounts/register',
-            data={'username': 'abcdef', 'password': '12345678', 'email': 'qwerty@example.com'},
+            data={
+                'username': 'abcde1', 
+                'first_name': 'Steve1',
+                'password1': 'test2',
+                'password2': 'test2',
+                'email': 'qwerty@example.com'
+            },
+
             follow=True)
 
         self.assertTrue(response.status_code == 200)
-        self.assertContains(response, 'Username or email exists.')
+        self.assertContains(response, 'A user with that email already exists')
 
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_reset_password(self):
         # Set up the user
         response = self.client.post('/accounts/register',
-            data={'username': 'abcd', 'password': 'testtest', 'email': 'qwerty@example.com'},
+            data={
+                'username': 'abcde', 
+                'first_name': 'Steve',
+                'password1': 'test1',
+                'password2': 'test1',
+                'email': 'qwerty@example.com'
+            },
             follow=True)
 
         # Try and reset the password

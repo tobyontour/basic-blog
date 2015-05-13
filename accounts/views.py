@@ -1,21 +1,41 @@
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.template import RequestContext, Context, loader
-from django.contrib.auth.models import User
 from django import forms
+from django.shortcuts import render
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import cache_page, never_cache
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from django.core.validators import MinLengthValidator
+from django.views.decorators.cache import never_cache
 
-
-class RegistrationForm(forms.Form):
-    username = forms.RegexField(r'^[a-z]+$', min_length=2, max_length=8)
+class RegistrationForm(UserCreationForm):
+    password1 = forms.CharField(label="Password", min_length=5,
+        widget=forms.PasswordInput)
     email = forms.EmailField()
-    password = forms.CharField(min_length=5, widget=forms.PasswordInput())
+    first_name = forms.CharField(max_length=20)
+    last_name = forms.CharField(max_length=30, required=False)
 
-    def clean(self):
-        cleaned_data = super(RegistrationForm, self).clean()
-        return cleaned_data
+    class Meta:
+        model = User
+        fields = ("username", "email", "first_name", "last_name")
+
+    def __init__(self, *args, **kwargs):
+        super(RegistrationForm, self).__init__(*args, **kwargs)
+        f = self.fields.get('username')
+        f.validators.append(MinLengthValidator(3))
+
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        try:
+            User._default_manager.get(email=email)
+        except User.DoesNotExist:
+            return email
+        raise forms.ValidationError(
+            'A user with that email already exists',
+            code='duplicate_email',
+        )
 
 @never_cache
 def register(request):
@@ -31,48 +51,43 @@ def register(request):
                 else:
                     raise Exception("User exists")
                 # Create user
-                user = User.objects.create_user(
-                    form.cleaned_data['username'],
-                    form.cleaned_data['email'],
-                    form.cleaned_data['password']
-                )
-
+                user = form.save()
                 # At this point, user is a User object that has already been saved
                 # to the database. You can continue to change its attributes
                 # if you want to change other fields.
-                #user.last_name = 'Lennon'
-                #user.save()
+                if form.cleaned_data['first_name']:
+                    user.first_name = form.cleaned_data['first_name']
+                if form.cleaned_data['last_name']:
+                    user.last_name = form.cleaned_data['last_name']
+                user.save()
                 return HttpResponseRedirect(reverse('login'))
             except Exception, e:
                 messages.add_message(request, messages.ERROR, 'Username or email exists.')
-
+        print form.errors
     else:
         form = RegistrationForm()
-    template = loader.get_template('registration/register_form.html')
-    context = RequestContext(request, {
-        'form': form,
-    })
 
-    return HttpResponse(template.render(context))
+    template = loader.get_template('registration/register_form.html')
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'registration/register_form.html', context)
 
 @login_required()
 @never_cache
 def profile(request):
-    template = loader.get_template('registration/profile.html')
-    context = RequestContext(request)
-    return HttpResponse(template.render(context))
+    return render(request, 'registration/profile.html', {})
 
 @login_required()
 @never_cache
 def public_profile(request, username):
-    template = loader.get_template('registration/public_profile.html')
-
     try:
         profile_user = User.objects.get(username=username)
     except DoesNotExist:
         return HttpResponseNotFound('No such user')
 
-    context = RequestContext(request, {
+    context = {
         'username': profile_user.username
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, 'registration/public_profile.html', context)
