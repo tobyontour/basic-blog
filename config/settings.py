@@ -98,7 +98,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
-    'config.site_name_processor',
+    'config.site_metadata_processor',
 )
 
 # List of callables that know how to import templates from various sources.
@@ -133,6 +133,7 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
 )
 
 ROOT_URLCONF = 'config.urls'
@@ -149,6 +150,19 @@ TEMPLATE_DIRS = (
     BASE_DIR + "/accounts/templates",
 )
 
+# TEMPLATES = [ 
+#     { 
+#         'BACKEND': 'django.template.backends.django.DjangoTemplates', 
+#         'DIRS': TEMPLATE_DIRS, 
+#         # 'OPTIONS': { 
+#         #     'allowed_include_roots': settings.ALLOWED_INCLUDE_ROOTS, 
+#         #     'context_processors': settings.TEMPLATE_CONTEXT_PROCESSORS, 
+#         #     'debug': settings.TEMPLATE_DEBUG, 
+#         #     'loaders': settings.TEMPLATE_LOADERS, 
+#         #     'string_if_invalid': settings.TEMPLATE_STRING_IF_INVALID, 
+#         # }, 
+#     }, 
+# ]
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -237,6 +251,7 @@ LOGGING = {
 }
 
 SITE_NAME = 'My blog'
+SITE_COPYRIGHT = '&copy; 2015 Toby Bettridge'
 LOGIN_REDIRECT_URL = reverse_lazy('profile')
 
 TESTING = 'test' in sys.argv

@@ -6,7 +6,7 @@ from django.contrib import admin
 from articles.views import PageView, HomePageView, PageListView
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = [
     # Examples:
     url(r'^$', HomePageView.as_view(), name='home'),
 
@@ -23,4 +23,4 @@ urlpatterns = patterns('',
     url(r'^pages/$', PageListView.as_view(), name='page-view'),
     url(r'^(?P<slug>[0-9a-z-]+)$', PageView.as_view(), name='page-view'),
 
-) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

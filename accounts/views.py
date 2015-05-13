@@ -63,7 +63,6 @@ def register(request):
                 return HttpResponseRedirect(reverse('login'))
             except Exception, e:
                 messages.add_message(request, messages.ERROR, 'Username or email exists.')
-        print form.errors
     else:
         form = RegistrationForm()
 

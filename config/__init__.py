@@ -7,9 +7,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def site_name_processor(request):
+def site_metadata_processor(request):
     if not hasattr(settings, 'SITE_NAME'):
         logger.warning('No SITE_NAME set in settings.')
     return {
         'SITE_NAME': getattr(settings, 'SITE_NAME', 'Blog'),
+        'SITE_COPYRIGHT': getattr(settings, 'SITE_COPYRIGHT', 'This content is copyrighted.')
     }
