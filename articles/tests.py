@@ -49,6 +49,7 @@ class ArticleTest(TestCase):
         self.assertContains(response, 'New article body')
         self.assertTrue('article' in response.context)
         self.assertTrue(response.context['article'].published == False)
+        self.assertTrue(str(response.context['article']) == 'New article')
 
         response = self.client.get('/articles/new-article')
         self.assertContains(response, 'New article')
@@ -270,34 +271,3 @@ class ArticleParsingTest(TestCase):
 Blah blah
 {image:12}
   {image:23}{image:45}'''), [12,23,45])
-
-
-
-
-
-
-
-'''
-    def test_article_summary_by_month(self):
-        user = User.objects.all()[0].pk
-        for month in range(1, 13):
-            for day in range(1,28, 5):
-                article = Article()
-                article.title = "%d/%d Article" % (day, month)
-                article.author_id = user
-                article.pub_date = datetime.datetime(2014,month,day)
-                article.slug = "%d-%d-article" % (day, month)
-                article.published = True
-                article.save()
-
-        response = self.client.get('/articles/')
-        print response.context['article_date_list']
-        result = response.context['article_date_list']
-        # Expecting something like:
-        # result[2014][1] = 6
-        self.assertTrue(type(result) is dict)
-        self.assertTrue(2014 in result)
-        for month in range(1, 13):
-            self.assertTrue(month in result[2014])
-            self.assertTrue(result[2014][month] == 6)
-'''

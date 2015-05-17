@@ -42,27 +42,17 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            try:
-                try:
-                    existing_user = User.objects.get(email=form.cleaned_data['email'])
-                except Exception, e:
-                    # Doesn't exist
-                    pass
-                else:
-                    raise Exception("User exists")
-                # Create user
-                user = form.save()
-                # At this point, user is a User object that has already been saved
-                # to the database. You can continue to change its attributes
-                # if you want to change other fields.
-                if form.cleaned_data['first_name']:
-                    user.first_name = form.cleaned_data['first_name']
-                if form.cleaned_data['last_name']:
-                    user.last_name = form.cleaned_data['last_name']
-                user.save()
-                return HttpResponseRedirect(reverse('login'))
-            except Exception, e:
-                messages.add_message(request, messages.ERROR, 'Username or email exists.')
+            # Create user
+            user = form.save()
+            # At this point, user is a User object that has already been saved
+            # to the database. You can continue to change its attributes
+            # if you want to change other fields.
+            if form.cleaned_data['first_name']:
+                user.first_name = form.cleaned_data['first_name']
+            if form.cleaned_data['last_name']:
+                user.last_name = form.cleaned_data['last_name']
+            user.save()
+            return HttpResponseRedirect(reverse('login'))
     else:
         form = RegistrationForm()
 
@@ -78,12 +68,11 @@ def register(request):
 def profile(request):
     return render(request, 'registration/profile.html', {})
 
-@login_required()
 @never_cache
 def public_profile(request, username):
     try:
         profile_user = User.objects.get(username=username)
-    except DoesNotExist:
+    except User.DoesNotExist, e:
         return HttpResponseNotFound('No such user')
 
     context = {

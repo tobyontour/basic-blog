@@ -107,6 +107,26 @@ class AccountsTest(TestCase):
 
         self.assertContains(response, 'Ensure this value has at least 5 characters')
 
+    def test_last_name(self):
+        """
+        Test that the last name works
+        """
+        response = self.client.post('/accounts/register',
+            data={
+                'username': 'abcd',
+                'first_name': 'Steve',
+                'last_name': 'Doe',
+                'password1': 'tests',
+                'password2': 'tests',
+                'email': 'qwerty@example.com'
+            })
+
+        response = self.client.post('/accounts/login/',
+            data={'username': 'abcd', 'password': 'tests'},
+            follow=True)
+
+        self.assertTrue('Doe' == response.context['user'].last_name)
+
     def test_non_existent_user_cant_log_in(self):
         response = self.client.post('/accounts/login/',
             data={'username': 'abcd', 'password': 'testtest'})
@@ -247,23 +267,14 @@ class AccountsTest(TestCase):
         response = self.client.get('/accounts/user/testuser')
         self.assertTrue('username' in response.context)
 
-    def test_public_profile_anonymous(self):
-        # Set up the user
-        response = self.client.post('/accounts/register',
-            data={'username': 'abcd', 'password': 'testtest', 'email': 'qwerty@example.com'},
-            follow=True)
+    def test_public_profile_non_existent(self):
+        response = self.client.get('/accounts/user/random', follow=True)
 
+        self.assertTrue(response.status_code == 404)
+
+    def test_public_profile_anonymous(self):
         response = self.client.get('/accounts/user/testuser', follow=True)
 
-        self.assertFalse('username' in response.context)
+        self.assertTrue('username' in response.context)
 
 
-    def test_public_profile_anonymous_404(self):
-        # Set up the user
-        response = self.client.post('/accounts/register',
-            data={'username': 'abcd', 'password': 'testtest', 'email': 'qwerty@example.com'},
-            follow=True)
-
-        response = self.client.get('/accounts/user/nouser', follow=True)
-
-        self.assertFalse(response.status_code == 404)
