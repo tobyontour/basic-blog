@@ -12,6 +12,11 @@ from articles.views import _get_images_in_text
 
 class ArticleTest(TestCase):
     #fixtures = ['users.json']
+    def setUp(self):
+        user = User.objects.create_user('testuser', email='testuser@example.com', password='testuser')
+        user.first_name = 'John'
+        user.last_name = 'Doe'
+        user.save()
 
     def create_articles(self, number_of_articles=1, published=True):
         self.client.login(username="testuser", password="testuser")
@@ -178,9 +183,11 @@ class ArticleTest(TestCase):
                 'body': 'New article body',
             },
             follow=True)
+
         self.client.logout()
+
         response = self.client.get('/articles/new-article-title')
-        self.assertNotContains(response, 'New article title', status_code=403)
+        self.assertNotContains(response, 'New article title', status_code=404)
 
     def test_retrieve_published_article_not_logged_in(self):
         self.client.login(username="testuser", password="testuser")
@@ -232,7 +239,6 @@ Header 2
                 'body': 'New article body',
             },
             follow=True)
-
         response = self.client.get('/articles/new-article/edit')
         self.assertContains(response, 'id_title')
         self.assertContains(response, 'id_body')

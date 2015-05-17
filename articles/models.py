@@ -18,7 +18,7 @@ class Article(models.Model):
     # body
     body = models.TextField()
     # image
-    image = models.ImageField(upload_to='photos/%Y/%m/%d')
+    image = models.ImageField(upload_to='photos/%Y/%m/%d', blank=True)
 
     slug = models.SlugField(max_length=50, blank=True, unique=True)
     created = models.DateTimeField(auto_now_add=True)

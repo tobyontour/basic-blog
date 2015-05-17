@@ -8,7 +8,7 @@ runserver:
 	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py runserver --settings=$(SETTINGS)
 
 test: 
-	SECRET_KEY=$(SECRET_KEY) $(PYTHON) -Wall manage.py test $(APPS) --settings=$(SETTINGS)
+	SECRET_KEY=$(SECRET_KEY) $(PYTHON) -Wall manage.py test $(APPS) --settings=$(SETTINGS) --failfast
 
 pep8: checkvenv
 	flake8 articles accounts
