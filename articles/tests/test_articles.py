@@ -1,8 +1,5 @@
 """
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
+Tests for Articles
 """
 import datetime
 from django.test import TestCase
@@ -11,7 +8,7 @@ from django.contrib.auth.models import User
 from articles.views import _get_images_in_text
 
 class ArticleTest(TestCase):
-    #fixtures = ['users.json']
+
     def setUp(self):
         user = User.objects.create_user('testuser', email='testuser@example.com', password='testuser')
         user.first_name = 'John'
@@ -319,6 +316,10 @@ Header 2
         response = self.client.get('/new-page')
         self.assertContains(response, 'New page')
         self.assertContains(response, 'New page body')
+
+    def test_home_page(self):
+        self.create_articles(number_of_articles=10)
+        response = self.client.get('/')
 
 class ArticleParsingTest(TestCase):
 

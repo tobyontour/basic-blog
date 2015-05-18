@@ -156,6 +156,7 @@ class HomePageView(ListView):
         if len(home_article) > 0:
             context['home_article'] = home_article[0]
             context['header_image'] = home_article[0].image
+        print "HOME PAGE"
         return context
 
 class ArticleImageCreateView(LoginRequiredMixin, CreateView):

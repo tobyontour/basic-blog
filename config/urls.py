@@ -7,7 +7,6 @@ from articles.views import PageView, HomePageView, PageListView
 admin.autodiscover()
 
 urlpatterns = [
-    # Examples:
     url(r'^$', HomePageView.as_view(), name='home'),
 
     # Authentication
