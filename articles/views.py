@@ -111,7 +111,7 @@ class ArticleView(DetailView):
 class PageView(DetailView):
     template_name = 'articles/page.html'
     model = Article
-    context_object_name = 'article'
+    context_object_name = 'page'
 
     def get_queryset(self):
         queryset = super(PageView, self).get_queryset()

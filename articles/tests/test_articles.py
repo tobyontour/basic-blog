@@ -255,6 +255,34 @@ Header 2
         self.assertContains(response, 'Updated title')
         self.assertContains(response, 'New article body')
 
+    def test_create_page(self):
+        self.client.login(username="testuser", password="testuser")
+        response = self.client.get('/articles/new')
+        self.assertContains(response, 'Title')
+        self.assertContains(response, 'Body')
+        self.assertContains(response, 'Slug')
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'New page',
+                'body': 'New page body',
+                'published': True,
+                'is_page': True,
+            },
+            follow=True)
+
+        self.assertContains(response, 'New page')
+        self.assertContains(response, 'New page body')
+        self.assertTrue('page' in response.context)
+        self.assertTrue(response.context['page'].published == True)
+        self.assertTrue(str(response.context['page']) == 'New page')
+
+        response = self.client.get('/articles/new-page')
+        self.assertTrue(response.status_code == 404)
+        response = self.client.get('/new-page')
+        self.assertContains(response, 'New page')
+        self.assertContains(response, 'New page body')
+
 class ArticleParsingTest(TestCase):
 
     def test_text_parsing_for_images_1(self):

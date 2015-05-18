@@ -1,24 +1,24 @@
 {% extends 'base.html' %}
 {% load markdown_deux_tags %}
 
-{% block title %}{{ article.title }}{% endblock %}
-{% block page_title %}{{ article.title }}{% endblock %}
+{% block title %}{{ page.title }}{% endblock %}
+{% block page_title %}{{ page.title }}{% endblock %}
 
-{% if article.image %}
-  {% block header_image %}{{ article.image.url }}{% endblock %}
+{% if page.image %}
+  {% block header_image %}{{ page.image.url }}{% endblock %}
 {% endif %}
 
 {% block content %}
 <div class="col-lg-2 col-md-2">
-  {% if user == article.author %}
+  {% if user == page.author %}
   <ul class="nav nav-pills nav-stacked">
-    <li class="active"><a href="{% url 'articles:view' article.slug %}">View</a></li>
-    <li><a href="{% url 'articles:edit' article.slug %}">Edit</a></li>
-    <li><a href="{% url 'articles:delete' article.slug %}">Delete</a></li>
+    <li class="active"><a href="{% url 'articles:view' page.slug %}">View</a></li>
+    <li><a href="{% url 'articles:edit' page.slug %}">Edit</a></li>
+    <li><a href="{% url 'articles:delete' page.slug %}">Delete</a></li>
   </ul>
   {% endif %}
 </div>
 <div class="col-lg-8 col-md-8 body">
-  {{ article.body |markdown }}
+  {{ page.body |markdown }}
 </div>
 {% endblock %}
