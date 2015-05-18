@@ -109,25 +109,35 @@ class ArticleTest(TestCase):
 
         response = self.client.post('/articles/new',
             {
-                'title': 'New article',
+                'title': 'New article title',
                 'body': 'New article body',
             },
             follow=True)
 
-        response = self.client.get('/articles/new-article/edit')
+        response = self.client.get('/articles/new-article-title/edit')
         self.assertContains(response, 'id_title')
         self.assertContains(response, 'id_body')
         self.assertContains(response, 'id_published')
         self.assertContains(response, 'id_slug')
+        self.assertContains(response, 'New article title')
+        self.assertContains(response, 'New article body')
 
-        response = self.client.post('/articles/new',
+        response = self.client.post('/articles/new-article-title/edit',
             {
                 'title': 'Updated title',
-                'body': 'New article body',
+                'body': 'New article body updated',
+                'slug': 'new-article-title',
+                'published': True,
             },
             follow=True)
+
+        self.assertTemplateUsed(response, 'articles/article.html')
         self.assertContains(response, 'Updated title')
-        self.assertContains(response, 'New article body')
+        self.assertContains(response, 'New article body updated')
+
+        response = self.client.get('/articles/new-article-title')
+        self.assertContains(response, 'Updated title')
+        self.assertContains(response, 'New article body updated')
 
 
     def test_update_article_not_logged_in(self):
@@ -154,6 +164,33 @@ class ArticleTest(TestCase):
             follow=True)
         self.assertContains(response, 'id_username')
         self.assertContains(response, 'id_password')
+
+    def test_delete_article(self):
+        self.create_articles(self, number_of_articles=3, published=True)
+        # 'title': 'New article %d title' % i,
+        # 'body': 'New article %d body' % i,
+        # 'published' : published
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.get('/articles/new-article-2-title')
+        self.assertTrue(response.status_code == 200)
+
+        response = self.client.get('/articles/new-article-2-title/delete')
+        self.assertContains(response, 'Are you sure you want to delete New article 2 title')
+        self.assertContains(response, 'Delete')
+
+        # Delete article
+        response = self.client.post('/articles/delete',
+            {
+            },
+            follow=True)
+ 
+        response = self.client.get('/articles/new-article-2-title')
+        self.assertTrue(response.status_code == 404)
+        response = self.client.get('/articles/new-article-1-title')
+        self.assertTrue(response.status_code == 200)
+        response = self.client.get('/articles/new-article-3-title')
+        self.assertTrue(response.status_code == 200)
 
     def test_update_non_existent_article(self):
         self.client.login(username="testuser", password="testuser")

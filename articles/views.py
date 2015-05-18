@@ -35,48 +35,26 @@ def _get_images_in_text(text):
     return ret
 
 
-@never_cache
-@login_required
-def article_add(request):
-    if request.method == 'POST':
+class ArticleCreateView(LoginRequiredMixin, CreateView):
+    model = Article
+    template_name = 'articles/article_form.html'
+    fields = ['title', 'subheading', 'body','image','slug','published','is_page']
 
-        form = ArticleForm(request.POST, request.FILES)
-        if form.is_valid():
-            article = form.save(commit=False)
-            if 'slug' not in request.POST or request.POST['slug'] == "":
-                article.slug = slugify(article.title)
-            article.author = request.user
-            article.save()
-            messages.add_message(request, messages.INFO, 'Article saved')
-            return HttpResponseRedirect(article.get_absolute_url())
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.INFO, 'Article saved')
+        form.instance.author = self.request.user 
+        return super(ArticleCreateView, self).form_valid(form)
 
-    else:
-        form = ArticleForm()
+class ArticleUpdateView(LoginRequiredMixin, UpdateView):
+    model = Article
+    template_name = 'articles/article_form.html'
+    fields = ['title', 'subheading', 'body','image','slug','published','is_page']
+    context_object_name = 'article'
 
-    t = loader.get_template('articles/article_form.html')
-    c = RequestContext(request, {'form': form})
-    return HttpResponse(t.render(c))
-
-@never_cache
-@login_required
-def article_edit(request, slug):
-    if request.method == 'POST':
-        try:
-            article = Article.objects.get(slug=slug)
-        except DoesNotExist:
-            return HttpResponseNotFound
-        form = ArticleForm(request.POST, request.FILES, instance=article)
-        if form.is_valid():
-            if form.has_changed():
-                article.save()
-            return HttpResponseRedirect(article.get_absolute_url())
-    else:
-        article = get_object_or_404(Article, slug=slug)
-        form = ArticleForm(instance=article)
-
-    t = loader.get_template('articles/article_form.html')
-    c = RequestContext(request, {'form': form, 'article': article, 'header_image': article.image})
-    return HttpResponse(t.render(c))
+    def get_context_data(self, **kwargs):
+        context = super(ArticleUpdateView, self).get_context_data(**kwargs)
+        context['header_image'] = context[self.context_object_name].image
+        return context
 
 class ArticleView(DetailView):
     template_name = 'articles/article.html'
@@ -184,11 +162,6 @@ class ArticleImageCreateView(LoginRequiredMixin, CreateView):
     model = ArticleImage
     template_name = 'articles/article_image_form.html'
     fields = ['image', 'title', 'article']
-
-    # def __init__(self, *args, **kwargs):
-    #     super(ArticleImageCreateView, self).__init__(*args, **kwargs)
-    #     print self.fields
-    #     self.fields['article'].queryset = Article.objects.order_by('-modified')
 
 class ArticleImageUpdateView(LoginRequiredMixin, UpdateView):
     model = ArticleImage
