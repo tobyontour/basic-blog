@@ -136,10 +136,6 @@ class PageListView(LoginRequiredMixin, ListView):
 
         return queryset.filter(is_page=True)
 
-    def get_context_data(self, **kwargs):
-        context = super(PageListView, self).get_context_data(**kwargs)
-        return context
-
 class HomePageView(ListView):
     model = Article
     template_name = 'home.html'
@@ -156,7 +152,7 @@ class HomePageView(ListView):
         if len(home_article) > 0:
             context['home_article'] = home_article[0]
             context['header_image'] = home_article[0].image
-        print "HOME PAGE"
+
         return context
 
 class ArticleImageCreateView(LoginRequiredMixin, CreateView):
@@ -185,10 +181,6 @@ class ArticleImageListView(LoginRequiredMixin, ListView):
 
         return queryset.order_by('-pk')
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(ArticleListView, self).get_context_data(**kwargs)
-    #     return context
-
 class ArticleImageView(DetailView):
     template_name = 'articles/article_image.html'
     model = ArticleImage
@@ -196,7 +188,7 @@ class ArticleImageView(DetailView):
 
 class ArticleImageDeleteView(LoginRequiredMixin, DeleteView):
     model = ArticleImage
-    success_url = reverse_lazy('articles:images-list')
+    success_url = reverse_lazy('articles:image-list')
     context_object_name = 'image'
 
     def get_context_data(self, **kwargs):

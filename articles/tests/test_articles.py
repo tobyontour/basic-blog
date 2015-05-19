@@ -1,11 +1,13 @@
 """
 Tests for Articles
 """
-import datetime
+import datetime, os
 from django.test import TestCase
 from articles.models import Article
 from django.contrib.auth.models import User
 from articles.views import _get_images_in_text
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 
 class ArticleTest(TestCase):
 
@@ -51,6 +53,45 @@ class ArticleTest(TestCase):
         response = self.client.get('/articles/new-article')
         self.assertContains(response, 'New article')
         self.assertContains(response, 'New article body')
+
+    def test_create_article_with_images(self):
+        # Setup
+        self.client.login(username="testuser", password="testuser")
+        response = self.client.post('/articles/new',
+                {
+                    'title': 'New article title',
+                    'body': 'With {image:1} and {image:2} so there.',
+                    'published' : True,
+                })
+
+        # Create an image
+        f = SimpleUploadedFile("file.txt", "file_content")
+        response = self.client.post('/articles/images/new',
+            {
+                'title': 'New image title',
+                'article': 1,
+                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'r'),
+            },
+            follow=True)
+
+        self.assertContains(response, 'New image title')
+        img1 = response.context['image']
+
+        f = SimpleUploadedFile("file.txt", "file_content")
+        response = self.client.post('/articles/images/new',
+            {
+                'title': 'New second image title',
+                'article': 1,
+                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'r'),
+            },
+            follow=True)
+
+        self.assertContains(response, 'New second image title')
+        img2 = response.context['image']
+
+        response = self.client.get('/articles/new-article-title')
+        self.assertTrue(img1.image.url in response.context['body'])
+        self.assertTrue(img2.image.url in response.context['body'])
 
     def test_create_article_own_slug(self):
         self.client.login(username="testuser", password="testuser")
@@ -163,27 +204,31 @@ class ArticleTest(TestCase):
         self.assertContains(response, 'id_password')
 
     def test_delete_article(self):
-        self.create_articles(self, number_of_articles=3, published=True)
+        self.create_articles(number_of_articles=3, published=True)
         # 'title': 'New article %d title' % i,
         # 'body': 'New article %d body' % i,
         # 'published' : published
         self.client.login(username="testuser", password="testuser")
 
         response = self.client.get('/articles/new-article-2-title')
+        self.assertTemplateUsed(response, 'articles/article.html')
         self.assertTrue(response.status_code == 200)
 
         response = self.client.get('/articles/new-article-2-title/delete')
-        self.assertContains(response, 'Are you sure you want to delete New article 2 title')
+        self.assertTemplateUsed(response, 'articles/article_confirm_delete.html')
+        self.assertContains(response, 'Are you sure you want to delete "New article 2 title"?')
         self.assertContains(response, 'Delete')
+        self.assertTrue('header_image' in response.context)
 
         # Delete article
-        response = self.client.post('/articles/delete',
+        response = self.client.post('/articles/new-article-2-title/delete',
             {
             },
             follow=True)
  
         response = self.client.get('/articles/new-article-2-title')
-        self.assertTrue(response.status_code == 404)
+        
+        self.assertTrue(response.status_code == 404, msg="Expectec 404, got %d" % response.status_code)
         response = self.client.get('/articles/new-article-1-title')
         self.assertTrue(response.status_code == 200)
         response = self.client.get('/articles/new-article-3-title')
@@ -265,29 +310,29 @@ Header 2
         self.assertContains(response, '<h2>Header 2</h2>',
                 msg_prefix='Header 2 is not created by Markdown')
 
-    def test_delete_article(self):
-        self.client.login(username="testuser", password="testuser")
+    # def test_delete_article(self):
+    #     self.client.login(username="testuser", password="testuser")
 
-        response = self.client.post('/articles/new',
-            {
-                'title': 'New article',
-                'body': 'New article body',
-            },
-            follow=True)
-        response = self.client.get('/articles/new-article/edit')
-        self.assertContains(response, 'id_title')
-        self.assertContains(response, 'id_body')
-        self.assertContains(response, 'id_published')
-        self.assertContains(response, 'id_slug')
+    #     response = self.client.post('/articles/new',
+    #         {
+    #             'title': 'New article',
+    #             'body': 'New article body',
+    #         },
+    #         follow=True)
+    #     response = self.client.get('/articles/new-article/edit')
+    #     self.assertContains(response, 'id_title')
+    #     self.assertContains(response, 'id_body')
+    #     self.assertContains(response, 'id_published')
+    #     self.assertContains(response, 'id_slug')
 
-        response = self.client.post('/articles/new',
-            {
-                'title': 'Updated title',
-                'body': 'New article body',
-            },
-            follow=True)
-        self.assertContains(response, 'Updated title')
-        self.assertContains(response, 'New article body')
+    #     response = self.client.post('/articles/new',
+    #         {
+    #             'title': 'Updated title',
+    #             'body': 'New article body',
+    #         },
+    #         follow=True)
+    #     self.assertContains(response, 'Updated title')
+    #     self.assertContains(response, 'New article body')
 
     def test_create_page(self):
         self.client.login(username="testuser", password="testuser")
@@ -317,9 +362,52 @@ Header 2
         self.assertContains(response, 'New page')
         self.assertContains(response, 'New page body')
 
+    def test_page_list(self):
+        self.client.login(username="testuser", password="testuser")
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Page one',
+                'body': 'New page body 1',
+                'published': True,
+                'is_page': True,
+            },
+            follow=True)
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Page two',
+                'body': 'New page body 1',
+                'published': True,
+                'is_page': True,
+            },
+            follow=True)
+
+        response = self.client.get('/pages/')
+
+        self.assertTrue(len(response.context['articles']) == 2)
+        self.assertTemplateUsed('articles/article_list.html')
+
+
     def test_home_page(self):
         self.create_articles(number_of_articles=10)
         response = self.client.get('/')
+        
+    def test_home_page_article(self):
+        self.create_articles(number_of_articles=10)
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Home page article',
+                'body': 'New home page body',
+                'published': True,
+                'is_page': True,
+                'slug': 'home',
+            },
+            follow=True)
+
+        response = self.client.get('/')
+        self.assertTrue(response.context['home_article'].title == 'Home page article')
+        self.assertTrue(response.context['home_article'].body == 'New home page body')
 
 class ArticleParsingTest(TestCase):
 
