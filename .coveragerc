@@ -7,6 +7,8 @@ source = .
 # Regexes for lines to exclude from consideration
 omit =
     venv/*
+    config/settings/live.py
+    config/wsgi.py
     fabfile.py
 
 exclude_lines =

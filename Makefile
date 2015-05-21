@@ -1,5 +1,5 @@
 SETTINGS=config.settings.dev
-APPS=articles accounts
+APPS=articles accounts config
 PYTHON=python
 SECRET_KEY=THIS_IS_NOT_A_SECRET_REDEFINE_IN_LOCAL_MK
 -include local.mk
