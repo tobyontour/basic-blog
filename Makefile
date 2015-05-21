@@ -1,6 +1,6 @@
 SETTINGS=config.settings.dev
 APPS=articles accounts
-PYTHON=venv/bin/python
+PYTHON=python
 SECRET_KEY=THIS_IS_NOT_A_SECRET_REDEFINE_IN_LOCAL_MK
 -include local.mk
 
@@ -13,10 +13,10 @@ collectstatic:
 test: 
 	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py test $(APPS) --settings=$(SETTINGS) --failfast
 
-pep8: checkvenv
+pep8: 
 	flake8 articles accounts
 
-coverage: checkvenv
+coverage: 
 	@# Runs tests on artartists and produces a coverage report
 	SECRET_KEY=$(SECRET_KEY) coverage run manage.py test $(APPS) --settings=$(SETTINGS); coverage html --omit="venv/*","*/test_*"
 
