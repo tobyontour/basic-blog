@@ -13,11 +13,15 @@ collectstatic:
 test: 
 	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py test $(APPS) --settings=$(SETTINGS) --failfast
 
+citest:
+	@# Runs tests with coverage
+	SECRET_KEY=$(SECRET_KEY) coverage run manage.py test $(APPS) --settings=$(SETTINGS)
+
 pep8: 
 	flake8 articles accounts
 
 coverage: 
-	@# Runs tests on artartists and produces a coverage report
+	@# Runs tests and produces a coverage report
 	SECRET_KEY=$(SECRET_KEY) coverage run manage.py test $(APPS) --settings=$(SETTINGS); coverage html --omit="venv/*","*/test_*"
 
 checkvenv:
