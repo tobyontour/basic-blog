@@ -17,7 +17,7 @@ urlpatterns = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
+    # url(r'^admin/', include(admin.site.urls)),
 
     url(r'^pages/$', PageListView.as_view(), name='page-view'),
     url(r'^(?P<slug>[0-9a-z-]+)$', PageView.as_view(), name='page-view'),

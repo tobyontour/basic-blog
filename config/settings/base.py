@@ -1,10 +1,13 @@
 # Django settings for basic-blog project.
+
+# THIS IS INHERITED BY THE LIVE SETTINGS SO DO NOT SET ANY DEBUG SETTINGS HERE
+
 import os, sys
 from django.core.urlresolvers import reverse_lazy
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/..'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/../..'
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -13,17 +16,17 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': BASE_DIR + '/db.sqlite',                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+#         'NAME': BASE_DIR + '/db.sqlite',                      # Or path to database file if using sqlite3.
+#         # The following settings are not used with sqlite3:
+#         'USER': '',
+#         'PASSWORD': '',
+#         'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+#         'PORT': '',                      # Set to empty string for default.
+#     }
+# }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -87,10 +90,6 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = os.environ.get('SECRET_KEY')
-
-
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
@@ -105,24 +104,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
+
 )
 
-DEBUG_TOOLBAR_PANELS = [
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
-    'debug_toolbar.panels.cache.CachePanel',
-    'debug_toolbar.panels.signals.SignalsPanel',
-    'debug_toolbar.panels.logging.LoggingPanel',
-    'debug_toolbar.panels.profiling.ProfilingPanel',
-    'template_timings_panel.panels.TemplateTimings.TemplateTimings',
-]
+
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -131,8 +117,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
 )
 
@@ -150,19 +135,19 @@ TEMPLATE_DIRS = (
     BASE_DIR + "/accounts/templates",
 )
 
-# TEMPLATES = [ 
-#     { 
-#         'BACKEND': 'django.template.backends.django.DjangoTemplates', 
-#         'DIRS': TEMPLATE_DIRS, 
-#         # 'OPTIONS': { 
-#         #     'allowed_include_roots': settings.ALLOWED_INCLUDE_ROOTS, 
-#         #     'context_processors': settings.TEMPLATE_CONTEXT_PROCESSORS, 
-#         #     'debug': settings.TEMPLATE_DEBUG, 
-#         #     'loaders': settings.TEMPLATE_LOADERS, 
-#         #     'string_if_invalid': settings.TEMPLATE_STRING_IF_INVALID, 
-#         # }, 
-#     }, 
-# ]
+TEMPLATES = [ 
+    { 
+        'BACKEND': 'django.template.backends.django.DjangoTemplates', 
+        'DIRS': TEMPLATE_DIRS, 
+        'OPTIONS': { 
+            # 'allowed_include_roots': settings.ALLOWED_INCLUDE_ROOTS, 
+            'context_processors': TEMPLATE_CONTEXT_PROCESSORS, 
+            'debug': TEMPLATE_DEBUG, 
+            'loaders': TEMPLATE_LOADERS, 
+            # 'string_if_invalid': settings.TEMPLATE_STRING_IF_INVALID, 
+        }, 
+    }, 
+]
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -171,9 +156,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
+    #'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    'django.contrib.admindocs',
+    #'django.contrib.admindocs',
     'markdown_deux',
     'sorl.thumbnail',
     'accounts',
@@ -255,4 +240,6 @@ SITE_COPYRIGHT = '&copy; 2015 Toby Bettridge'
 LOGIN_REDIRECT_URL = reverse_lazy('profile')
 
 TESTING = 'test' in sys.argv
-THUMBNAIL_DEBUG = True
+THUMBNAIL_DEBUG = False
+
+DISQUS_SHORTNAME = os.environ.get('DISQUS_SHORTNAME', '')
