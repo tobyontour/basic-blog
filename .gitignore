@@ -2,3 +2,8 @@
 *.pyc
 *.orig
 local.mk
+media
+htmlcov
+venv
+db.sqlite
+.coverage
