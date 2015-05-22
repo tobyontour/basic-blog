@@ -7,3 +7,4 @@ htmlcov
 venv
 db.sqlite
 .coverage
+secrets.json
