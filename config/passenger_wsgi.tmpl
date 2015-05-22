@@ -1,0 +1,21 @@
+import sys, os
+cwd = os.getcwd()
+sys.path.append(cwd)
+
+project_location = cwd + '/<youprojectname>'
+
+sys.path.insert(0, project_location)
+
+#Switch to new python
+if sys.version < "2.7.3": os.execl("/home/<shell_user>/<yourdomain.com>/env/bin/python",
+    "python2.7.3", *sys.argv)
+
+sys.path.insert(0,'/home/<shell_user>/<yourdomain.com>/env/bin')
+sys.path.insert(0,'/home/<shell_user>/<yourdomain.com>/env/lib/python2.7/site-packages/django')
+sys.path.insert(0,'/home/<shell_user>/<yourdomain.com>/env/lib/python2.7/site-packages')
+
+
+os.environ['DJANGO_SETTINGS_MODULE'] = "<youprojectname>.settings"
+
+import django.core.handlers.wsgi
+application = django.core.handlers.wsgi.WSGIHandler()
