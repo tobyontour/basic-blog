@@ -15,7 +15,8 @@ markdown2==2.3.0
 python-memcached==1.54
 selenium==2.45.0
 six==1.9.0
-sorl-thumbnail==12.2
+sorl-thumbnail<13
 sqlparse==0.1.15
 urllib3==1.10.4
+mysqlclient<1.4
 #wsgiref==0.1.2
