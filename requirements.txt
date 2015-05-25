@@ -13,10 +13,10 @@ django-versatileimagefield==1.0
 dropbox==2.2.0
 markdown2==2.3.0
 python-memcached==1.54
-selenium==2.45.0
+# selenium==2.45.0
 six==1.9.0
 sorl-thumbnail<13
 sqlparse==0.1.15
 urllib3==1.10.4
 mysql-python
-#wsgiref==0.1.2
+# wsgiref==0.1.2

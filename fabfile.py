@@ -86,13 +86,15 @@ def setup_passenger(force=False):
                         backup=False)    
 
 def createsuperuser():
-    django.settings_module('config.settings.live')
+    context = secrets
     with cd("/home/%(SHELL_USER)s/%(DOMAIN)s" % context):
         with shell_env(SECRET_KEY=context['SECRET_KEY'], DB_NAME=context['DB_NAME'], DB_USER=context['DB_USER'], DB_PASS=context['DB_PASS'], DB_HOST=context['DB_HOST']):
             run("PYTHONPATH=%(venv)s/bin:/home/%(SHELL_USER)s/%(DOMAIN)s/%(project)s %(venv)s/bin/django-admin createsuperuser --settings=%(settings)s" % context)
 
 def deploy(server='test'):
     run_tests()
+    setup_python_dreamhost()
+    setup_venv()
     setup_passenger()
     context = secrets
     with cd("/home/%(SHELL_USER)s/%(DOMAIN)s" % context):
