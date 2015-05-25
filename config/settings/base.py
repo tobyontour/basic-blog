@@ -227,6 +227,15 @@ LOGGING = {
     }
 }
 
+MARKDOWN_DEUX_STYLES = {
+    "default": {
+        "extras": {
+            "code-friendly": None,
+        },
+        "safe_mode": False,
+    },
+}
+
 SITE_NAME = os.environ.get('SITENAME', 'A blog site')
 SITE_COPYRIGHT = '&copy; 2015 ' + SITE_NAME
 LOGIN_REDIRECT_URL = reverse_lazy('profile')

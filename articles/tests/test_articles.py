@@ -310,29 +310,25 @@ Header 2
         self.assertContains(response, '<h2>Header 2</h2>',
                 msg_prefix='Header 2 is not created by Markdown')
 
-    # def test_delete_article(self):
-    #     self.client.login(username="testuser", password="testuser")
+    def test_article_markdown_embeded_html(self):
+        self.client.login(username="testuser", password="testuser")
 
-    #     response = self.client.post('/articles/new',
-    #         {
-    #             'title': 'New article',
-    #             'body': 'New article body',
-    #         },
-    #         follow=True)
-    #     response = self.client.get('/articles/new-article/edit')
-    #     self.assertContains(response, 'id_title')
-    #     self.assertContains(response, 'id_body')
-    #     self.assertContains(response, 'id_published')
-    #     self.assertContains(response, 'id_slug')
+        response = self.client.post('/articles/new',
+            {
+                'title': 'New article',
+                'body': '''
+Header
+======
+<em><strong><img src="#"></strong></em>
+--------
+                '''
+            },
+            follow=True)
 
-    #     response = self.client.post('/articles/new',
-    #         {
-    #             'title': 'Updated title',
-    #             'body': 'New article body',
-    #         },
-    #         follow=True)
-    #     self.assertContains(response, 'Updated title')
-    #     self.assertContains(response, 'New article body')
+        self.assertContains(response, '<h1>Header</h1>',
+                msg_prefix='Header 1 is not created by Markdown')
+        self.assertContains(response, '<em><strong><img src="#"></strong></em>',
+                msg_prefix='Raw HTML not passed through Markdown')
 
     def test_create_page(self):
         self.client.login(username="testuser", password="testuser")
