@@ -10,9 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 def site_metadata_processor(request):
-    if not hasattr(settings, 'SITE_NAME'): # pragma: no cover
+    if not hasattr(settings, 'SITE_NAME'):  # pragma: no cover
         logger.warning('No SITE_NAME set in settings.')
-        
+
     return {
         'SITE_NAME': getattr(settings, 'SITE_NAME', 'Blog'),
         'SITE_COPYRIGHT': getattr(settings, 'SITE_COPYRIGHT', 'This content is copyrighted.'),

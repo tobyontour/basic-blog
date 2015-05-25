@@ -18,15 +18,11 @@ citest:
 	SECRET_KEY=$(SECRET_KEY) coverage run manage.py test $(APPS) --settings=$(SETTINGS)
 
 pep8: 
-	flake8 articles accounts
+	flake8 $(APPS)
 
 coverage: 
 	@# Runs tests and produces a coverage report
 	SECRET_KEY=$(SECRET_KEY) coverage run manage.py test $(APPS) --settings=$(SETTINGS); coverage html --omit="venv/*","*/test_*"
-
-checkvenv:
-	@# Checks that we are in a virtual environment
-	@if [ -z "$(VIRTUAL_ENV)" ]; then echo "Not in virtualenv"; false;  fi
 
 clean:
 	find . -name "*.pyc" -delete

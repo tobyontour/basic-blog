@@ -2,7 +2,8 @@
 
 # THIS IS INHERITED BY THE LIVE SETTINGS SO DO NOT SET ANY DEBUG SETTINGS HERE
 
-import os, sys
+import os
+import sys
 from django.core.urlresolvers import reverse_lazy
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/../..'
@@ -29,7 +30,7 @@ MANAGERS = ADMINS
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS','').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -86,7 +87,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -105,9 +106,9 @@ ROOT_URLCONF = 'config.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'config.wsgi.application'
 
-TEMPLATES = [ 
-    { 
-        'BACKEND': 'django.template.backends.django.DjangoTemplates', 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': (
             # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
             # Always use forward slashes, even on Windows.
@@ -115,9 +116,9 @@ TEMPLATES = [
             BASE_DIR + "/templates",
             BASE_DIR + "/articles/templates",
             BASE_DIR + "/accounts/templates",
-        ), 
-        'OPTIONS': { 
-            # 'allowed_include_roots': settings.ALLOWED_INCLUDE_ROOTS, 
+        ),
+        'OPTIONS': {
+            # 'allowed_include_roots': settings.ALLOWED_INCLUDE_ROOTS,
             'context_processors': (
                 'django.core.context_processors.debug',
                 'django.core.context_processors.i18n',
@@ -128,16 +129,16 @@ TEMPLATES = [
                 'django.core.context_processors.request',
                 'config.views.site_metadata_processor',
             ),
-            'debug': DEBUG, 
+            'debug': DEBUG,
             'loaders': (
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
                 # 'django.template.loaders.eggs.Loader',
 
-            ), 
-            # 'string_if_invalid': settings.TEMPLATE_STRING_IF_INVALID, 
-        }, 
-    }, 
+            ),
+            # 'string_if_invalid': settings.TEMPLATE_STRING_IF_INVALID,
+        },
+    },
 ]
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -147,9 +148,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    #'django.contrib.admin',
+    # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    #'django.contrib.admindocs',
+    # 'django.contrib.admindocs',
     'markdown_deux',
     'sorl.thumbnail',
     'accounts',
