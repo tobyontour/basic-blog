@@ -29,6 +29,7 @@ try:
     os.environ["DB_HOST"] = "%(DB_HOST)s"
     os.environ["SECRET_KEY"] = "%(SECRET_KEY)s"
     os.environ["ALLOWED_HOSTS"] = "%(DOMAIN)s"
+    os.environ["SITENAME"] = "%(SITENAME)s"
 
 except Exception, e:
     tb = traceback.format_exc()

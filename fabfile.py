@@ -21,6 +21,7 @@ def _get_config(key="live"):
         data = json.loads(f.read())
 
     if key not in data:
+    for k in [key, "project", "gituser", "sitename"]
         raise Exception("Key '%(key)s' not in %(filename)s" % {'key': key, 'filename': "secrets.json"})
     secrets = data[key]
     env.user = secrets['SHELL_USER']

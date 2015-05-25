@@ -227,8 +227,8 @@ LOGGING = {
     }
 }
 
-SITE_NAME = 'My blog'
-SITE_COPYRIGHT = '&copy; 2015 Toby Bettridge'
+SITE_NAME = os.environ.get('SITENAME', 'A blog site')
+SITE_COPYRIGHT = '&copy; 2015 ' + SITE_NAME
 LOGIN_REDIRECT_URL = reverse_lazy('profile')
 
 TESTING = 'test' in sys.argv
