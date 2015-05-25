@@ -9,8 +9,6 @@ try:
     cwd = os.getcwd()
     sys.path.append(cwd)
 
-    debug=True
-
     project_location = cwd + '/config'
 
     sys.path.insert(0, project_location)
@@ -39,28 +37,25 @@ except Exception, e:
 
 log.close()
 import django.core.handlers.wsgi
-if not debug:
-    application = django.core.handlers.wsgi.WSGIHandler()
-else:
-    def application(environ, start_response):
-        log = file('/home/%(SHELL_USER)s/%(DOMAIN)s/passengerwsgi.log', 'a')
-        print >>log, "environ: " + str(environ)
-        results = []
-        try:
-            log.flush()
-            sys.path.append(cwd + "/%(project)s")
-            # import config
-            # results = config.application(environ, start_response)
-            from django.core.wsgi import get_wsgi_application
-            app = get_wsgi_application()
-            results = app(environ, start_response)
-            print >>log, "App executed successfully"
-        except Exception, inst:
-            tb = traceback.format_exc()
-            print >>log, str(tb)
-            print >>log, "Error: " + str(type(inst))
-            print >>log, inst.args
-            log.flush()
-        finally:
-            log.close()
-        return results
+def application(environ, start_response):
+    log = file('/home/%(SHELL_USER)s/%(DOMAIN)s/passengerwsgi.log', 'a')
+    print >>log, "environ: " + str(environ)
+    results = []
+    try:
+        log.flush()
+        sys.path.append(cwd + "/%(project)s")
+        # import config
+        # results = config.application(environ, start_response)
+        from django.core.wsgi import get_wsgi_application
+        app = get_wsgi_application()
+        results = app(environ, start_response)
+        print >>log, "App executed successfully"
+    except Exception, inst:
+        tb = traceback.format_exc()
+        print >>log, str(tb)
+        print >>log, "Error: " + str(type(inst))
+        print >>log, inst.args
+        log.flush()
+    finally:
+        log.close()
+    return results
