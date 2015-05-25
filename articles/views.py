@@ -21,11 +21,13 @@ from django.views.generic.edit import DeleteView, UpdateView, CreateView, FormVi
 from django.utils import timezone
 from django.conf import settings
 from django.forms.formsets import formset_factory
+from django.forms.models import modelform_factory
 
 from braces.views import LoginRequiredMixin
 
 from articles.forms import ArticleForm, ArticleImageForm
 from articles.models import Article, ArticleImage
+
 
 def _get_images_in_text(text):
     m = re.findall(r"\{image:(?P<image_number>\d+)\}", text)
@@ -34,11 +36,15 @@ def _get_images_in_text(text):
         ret.append(int(number))
     return ret
 
-
 class ArticleCreateView(LoginRequiredMixin, CreateView):
     model = Article
+    form_class =  modelform_factory(
+        Article,
+        widgets = {"tags": forms.TextInput },
+        fields = ['title', 'subheading', 'body', 'image', 'slug', 'published', 'is_page', 'tags'],
+        exclude = []
+    )
     template_name = 'articles/article_form.html'
-    fields = ['title', 'subheading', 'body','image','slug','published','is_page']
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.INFO, 'Article saved')
@@ -48,7 +54,7 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
 class ArticleUpdateView(LoginRequiredMixin, UpdateView):
     model = Article
     template_name = 'articles/article_form.html'
-    fields = ['title', 'subheading', 'body','image','slug','published','is_page']
+    fields = ['title', 'subheading', 'body','image','slug','published','is_page', 'tags']
     context_object_name = 'article'
 
     def get_context_data(self, **kwargs):

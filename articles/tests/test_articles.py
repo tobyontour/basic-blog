@@ -115,6 +115,26 @@ class ArticleTest(TestCase):
         self.assertContains(response, 'New article')
         self.assertNotContains(response, 'id_title')
 
+    def test_create_article_with_tags(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags': 'tag 1, tag 2 ,tag3',
+            },
+            follow=True)
+
+        self.assertContains(response, 'New article')
+        print response.content
+        self.assertTrue('article' in response.context)
+        self.assertTrue(len(response.context['article'].tags.all()) == 3)
+        self.assertTrue('tag 1' in response.context['article'].tags.all())
+        self.assertTrue('tag 2' in response.context['article'].tags)
+        self.assertTrue('tag3' in response.context['article'].tags)
+
+        response = self.client.get('/articles/new-article')
 
     def test_create_article_not_logged_in(self):
         response = self.client.get('/articles/new', follow=True)

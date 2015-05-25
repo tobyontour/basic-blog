@@ -6,8 +6,12 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.text import slugify
 from django.utils.encoding import python_2_unicode_compatible
+from django import forms
 
-# Create your models here.
+
+class ArticleTag(models.Model):
+    title = models.CharField(max_length=100)
+
 @python_2_unicode_compatible
 class Article(models.Model):
     # author
@@ -26,6 +30,7 @@ class Article(models.Model):
     pub_date = models.DateTimeField(auto_now=True)
     published = models.BooleanField(default=False)
     is_page = models.BooleanField(default=False)
+    tags = models.ManyToManyField(ArticleTag, blank=True)
 
     def __str__(self):
         return self.title
@@ -62,3 +67,5 @@ class ArticleImage(models.Model):
 
     def get_absolute_url(self):
         return reverse('articles:image-view', args=[self.pk])
+
+
