@@ -1,4 +1,8 @@
 import sys, os
+
+INTERP = "/home/%(SHELL_USER)s/%(DOMAIN)s/env/bin/python"
+#INTERP is present twice so that the new python interpreter knows the actual executable path
+if sys.executable != INTERP: os.execl(INTERP, INTERP, *sys.argv)
 cwd = os.getcwd()
 sys.path.append(cwd)
 
@@ -17,9 +21,13 @@ sys.path.insert(0,'/home/%(SHELL_USER)s/%(DOMAIN)s/env/lib/python2.7/site-packag
 os.environ['DJANGO_SETTINGS_MODULE'] = "config.settings.live"
 
 os.environ["DB_NAME"] = "%(DB_NAME)s"
-os.environ["DB_USER": = "%(DB_USER)s"
-os.environ["DB_PASS": = "%(DB_PASS)s"
-os.environ["DB_HOST": = "%(DB_HOST)s"
+os.environ["DB_USER"] = "%(DB_USER)s"
+os.environ["DB_PASS"] = "%(DB_PASS)s"
+os.environ["DB_HOST"] = "%(DB_HOST)s"
+os.environ["SECRET_KEY"] = "%(SECRET_KEY)s"
+os.environ["ALLOWED_HOSTS"] = "%(DOMAIN)s"
 
 import django.core.handlers.wsgi
-application = django.core.handlers.wsgi.WSGIHandler()
+
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
