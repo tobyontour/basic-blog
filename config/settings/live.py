@@ -14,7 +14,7 @@ DATABASES = {
     }
 }
 
-STATIC_ROOT = os.path.dirname(BASE_DIR) + '/../public/static/'
+STATIC_ROOT = BASE_DIR + '/../public/static/'
 MEDIA_ROOT = BASE_DIR + '/../public/media/'
 
 # Make this unique, and don't share it with anybody.
