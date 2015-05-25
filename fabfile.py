@@ -83,10 +83,11 @@ def deploy():
         'gituser': 'tobyontour',
         'settings': 'config.settings.live',
     }
+    context.update(secrets)
 
     #run_tests()
     setup_passenger()
-    with cd("/home/%s/%s" % (secrets['SHELL_USER'], secrets['DOMAIN'])):
+    with cd("/home/%(SHELL_USER)s/%(DOMAIN)s" % context):
         # Make sure that the media directory exists
         run("mkdir -p public/media")
         run("mkdir -p public/static")
@@ -95,6 +96,6 @@ def deploy():
         # run("git clone git://github.com/%(gituser)s/%(project)s.git" % context)
         run("%(venv)s/bin/pip install -r basic-blog/requirements.txt" % context)
 
-        run("%(venv)s/bin/python %(project)s/manage.py collectstatic --settings=%(settings)s" % context)
-        run("%(venv)s/bin/python %(project)s/manage.py migrate --settings=%(settings)s" % context)
+        run("SECRET_KEY=%(SECRET_KEY)s %(venv)s/bin/python %(project)s/manage.py collectstatic --settings=%(settings)s" % context)
+        run("SECRET_KEY=%(SECRET_KEY)s %(venv)s/bin/python %(project)s/manage.py migrate --settings=%(settings)s" % context)
         #manage.py syncdb
