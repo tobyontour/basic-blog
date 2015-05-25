@@ -1,0 +1,66 @@
+import sys, os
+import traceback
+log = file('/home/%(SHELL_USER)s/%(DOMAIN)s/passengerwsgi.log', 'a')
+print >>log, "Log file opened"
+try:
+    INTERP = "/home/%(SHELL_USER)s/%(DOMAIN)s/env/bin/python"
+    #INTERP is present twice so that the new python interpreter knows the actual executable path
+    if sys.executable != INTERP: os.execl(INTERP, INTERP, *sys.argv)
+    cwd = os.getcwd()
+    sys.path.append(cwd)
+
+    debug=True
+
+    project_location = cwd + '/config'
+
+    sys.path.insert(0, project_location)
+
+    #Switch to new python
+    if sys.version < "2.7.3": os.execl("/home/%(SHELL_USER)s/%(DOMAIN)s/env/bin/python",
+        "python2.7.3", *sys.argv)
+
+    sys.path.insert(0,'/home/%(SHELL_USER)s/%(DOMAIN)s/env/bin')
+    sys.path.insert(0,'/home/%(SHELL_USER)s/%(DOMAIN)s/env/lib/python2.7/site-packages/django')
+    sys.path.insert(0,'/home/%(SHELL_USER)s/%(DOMAIN)s/env/lib/python2.7/site-packages')
+
+    os.environ['DJANGO_SETTINGS_MODULE'] = "config.settings.live"
+
+    os.environ["DB_NAME"] = "%(DB_NAME)s"
+    os.environ["DB_USER"] = "%(DB_USER)s"
+    os.environ["DB_PASS"] = "%(DB_PASS)s"
+    os.environ["DB_HOST"] = "%(DB_HOST)s"
+    os.environ["SECRET_KEY"] = "%(SECRET_KEY)s"
+    os.environ["ALLOWED_HOSTS"] = "%(DOMAIN)s"
+
+except Exception, e:
+    tb = traceback.format_exc()
+    print >>log, str(tb)
+    print >>log, str(e)
+
+log.close()
+import django.core.handlers.wsgi
+if not debug:
+    application = django.core.handlers.wsgi.WSGIHandler()
+else:
+    def application(environ, start_response):
+        log = file('/home/%(SHELL_USER)s/%(DOMAIN)s/passengerwsgi.log', 'a')
+        print >>log, "environ: " + str(environ)
+        results = []
+        try:
+            log.flush()
+            sys.path.append(cwd + "/%(project)s")
+            # import config
+            # results = config.application(environ, start_response)
+            from django.core.wsgi import get_wsgi_application
+            app = get_wsgi_application()
+            results = app(environ, start_response)
+            print >>log, "App executed successfully"
+        except Exception, inst:
+            tb = traceback.format_exc()
+            print >>log, str(tb)
+            print >>log, "Error: " + str(type(inst))
+            print >>log, inst.args
+            log.flush()
+        finally:
+            log.close()
+        return results
