@@ -36,6 +36,7 @@ def _get_config(key="live"):
 
     secrets['project'] = data['project']
     secrets['gituser'] = data['gituser']
+    secrets['sitename'] = data['sitename']
     secrets['venv'] = "/home/%s/%s/env" % (secrets['SHELL_USER'], secrets['DOMAIN'])
     secrets['settings'] = 'config.settings.%(key)s' % {'key': key}
     return secrets
