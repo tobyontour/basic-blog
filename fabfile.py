@@ -20,9 +20,9 @@ def _get_config(key="live"):
     with open("secrets.json") as f:
         data = json.loads(f.read())
 
-    if key not in data:
-    for k in [key, "project", "gituser", "sitename"]
-        raise Exception("Key '%(key)s' not in %(filename)s" % {'key': key, 'filename': "secrets.json"})
+    for k in [key, "project", "gituser", "sitename"]:
+        if k not in data:
+            raise Exception("Key '%(key)s' not in %(filename)s" % {'key': k, 'filename': "secrets.json"})
     secrets = data[key]
     env.user = secrets['SHELL_USER']
     env.hosts = [secrets['DOMAIN']]
@@ -79,7 +79,7 @@ def setup_venv():
         run("PYTHONPATH=/home/%(shell_user)s/bin pip install virtualenv" % {'shell_user': secrets['SHELL_USER']})
         run("PYTHONPATH=/home/%(shell_user)s/bin virtualenv %(venv)s" % {'shell_user': secrets['SHELL_USER'], 'venv': venv})
 
-def setup_passenger(force=False):
+def setup_passenger():
     with cd("/home/%s/%s" % (secrets['SHELL_USER'], secrets['DOMAIN'])):
         upload_template("config/passenger_wsgi.tmpl", 
                         "passenger_wsgi.py",
