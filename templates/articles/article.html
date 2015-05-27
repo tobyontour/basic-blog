@@ -22,6 +22,15 @@
 <div class="col-lg-8 col-md-10 body">
   {{ body |markdown }}
 </div>
+<div class="col-lg-2 col-md-1">
+  {% if article.tags %}
+    <ul>
+    {% for tag in article.tags.all %}
+      <li><a href="{% url 'articles:tag-view' tag.slug %}">{{ tag.title }}</a></li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+</div>
 {% if DISQUS_SHORTNAME %}
   {% include "articles/disqus.html" with disqus_shortname="DISQUS_SHORTNAME" %}
 {% endif %}

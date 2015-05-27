@@ -7,6 +7,7 @@ from articles.models import Article
 from django.contrib.auth.models import User
 from articles.views import _get_images_in_text
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.urlresolvers import reverse
 
 
 class ArticleTest(TestCase):
@@ -501,8 +502,8 @@ class ArticleTagsTest(TestCase):
             },
             follow=True)
 
-
         self.assertTrue('article' in response.context)
+        self.assertTemplateUsed(response, 'articles/article.html')
         tags = [x.title for x in response.context['article'].tags.all()]
 
         self.assertTrue(len(tags) == 3)
@@ -511,6 +512,11 @@ class ArticleTagsTest(TestCase):
         self.assertTrue('tag 3' not in tags)
         self.assertTrue('tag 4' in tags)
         self.assertTrue('tag 5' in tags)
+
+        # Check the tags appear in the template
+        self.assertContains(response, 'tag 1')
+        self.assertContains(response, 'tag 4')
+        self.assertContains(response, 'tag 5')
 
     def test_update_article_with_notags(self):
         self.client.login(username="testuser", password="testuser")
@@ -529,6 +535,9 @@ class ArticleTagsTest(TestCase):
         response = self.client.get('/articles/new-article/edit')
 
         self.assertContains(response, 'id_tags_text')
+        self.assertContains(response, 'tag 1')
+        self.assertContains(response, 'tag 2')
+        self.assertContains(response, 'tag3')
 
         response = self.client.post('/articles/new-article/edit',
             {
@@ -546,3 +555,81 @@ class ArticleTagsTest(TestCase):
         self.assertTrue('tag 1' not in tags)
         self.assertTrue('tag 4' not in tags)
         self.assertTrue('tag 5' not in tags)
+
+    def test_tag_view(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Article 1',
+                'body': 'Article body',
+                'tags_text': 'tag 1, tag 2, tag 3',
+                'published': True,
+            },
+            follow=True)
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Article 2',
+                'body': 'Article body',
+                'tags_text': 'tag 2, tag 3',
+                'published': True,
+            },
+            follow=True)
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Article 3',
+                'body': 'Article body',
+                'tags_text': 'tag 3',
+                'published': True,
+            },
+            follow=True)
+
+        response = self.client.get('/articles/tags/tag-1')
+        self.assertContains(response, "Article 1")
+        self.assertNotContains(response, "Article 2")
+        self.assertNotContains(response, "Article 3")
+
+        response = self.client.get('/articles/tags/tag-2')
+        self.assertContains(response, "Article 1")
+        self.assertContains(response, "Article 2")
+        self.assertNotContains(response, "Article 3")
+
+        response = self.client.get('/articles/tags/tag-3')
+        self.assertContains(response, "Article 1")
+        self.assertContains(response, "Article 2")
+        self.assertContains(response, "Article 3")
+
+        self.assertContains(response, "<h1>tag 3</h1>")
+
+    def test_non_existent_tag_view(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Article 1',
+                'body': 'Article body',
+                'tags_text': 'tag 1, tag 2, tag 3',
+                'published': True,
+            },
+            follow=True)
+
+        response = self.client.get('/articles/tags/tag-4')
+        self.assertTrue(response.status_code == 404)
+
+    def test_tag_link_on_article(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Article 1',
+                'body': 'Article body',
+                'tags_text': 'tag 1, tag 2, tag 3',
+                'published': True,
+            },
+            follow=True)
+
+        response = self.client.get('/articles/article-1')
+        self.assertContains(response, reverse('articles:tag-view', kwargs={'slug': 'tag-1'}))
+ 

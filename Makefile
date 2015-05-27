@@ -7,6 +7,12 @@ SECRET_KEY=THIS_IS_NOT_A_SECRET_REDEFINE_IN_LOCAL_MK
 runserver: 
 	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py runserver --settings=$(SETTINGS)
 
+makemigrations:
+	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py makemigrations --settings=$(SETTINGS)
+
+migrate:
+	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py migrate --settings=$(SETTINGS)
+
 collectstatic:
 	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py collectstatic --settings=$(SETTINGS)
 

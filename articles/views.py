@@ -15,6 +15,7 @@ from django.template import RequestContext, loader
 from django.db.models import Count
 from django.forms import ModelForm
 
+from django.utils.text import slugify
 from django.views.generic import View
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
@@ -43,7 +44,12 @@ class ArticleForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ArticleForm, self).__init__(*args, **kwargs)
-        self.fields['tags_text'] = forms.CharField(label="Tags", required=False)
+
+        if self.instance.pk:
+            tags = ", ".join([x.title for x in self.instance.tags.all()])
+        else:
+            tags = ""
+        self.fields['tags_text'] = forms.CharField(label="Tags", required=False, initial=tags)
 
     def clean_tags_text(self):
         raw = self.cleaned_data['tags_text']
@@ -77,7 +83,7 @@ class ArticleForm(ModelForm):
         for tag in tags_text_list:
             if tag not in [t.title for t in tags]:
                 # Create tag
-                article.tags.create(title=tag)
+                article.tags.create(title=tag, slug=slugify(tag))
 
         if commit:
             article.save()
@@ -248,4 +254,18 @@ class ArticleImageDeleteView(LoginRequiredMixin, DeleteView):
         context = super(ArticleImageDeleteView, self).get_context_data( **kwargs)
 
         context['header_image'] = context[self.context_object_name].image
+        return context
+
+class ArticleTagView(ListView):
+    model = Article
+    template_name = 'articles/tag.html'
+    context_object_name = 'articles'
+
+    def get_queryset(self):
+        queryset = super(ArticleTagView, self).get_queryset()
+        return queryset.filter(tags__slug=self.kwargs['slug']).filter(is_page=False).filter(published=True)
+
+    def get_context_data(self, **kwargs):
+        context = super(ArticleTagView, self).get_context_data(**kwargs)
+        context['tag'] = get_object_or_404(ArticleTag, slug=self.kwargs['slug'])
         return context

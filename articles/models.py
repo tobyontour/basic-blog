@@ -12,9 +12,13 @@ from django import forms
 @python_2_unicode_compatible
 class ArticleTag(models.Model):
     title = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=50, blank=False, unique=True)
 
     def __str__(self):
         return self.title
+
+    def clean(self):
+        self.slug = slugify(self.title)
 
 @python_2_unicode_compatible
 class Article(models.Model):
