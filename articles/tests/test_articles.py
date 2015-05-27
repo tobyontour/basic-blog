@@ -3,7 +3,7 @@ Tests for Articles
 """
 import datetime, os
 from django.test import TestCase
-from articles.models import Article
+from articles.models import Article, ArticleTag
 from django.contrib.auth.models import User
 from articles.views import _get_images_in_text
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -453,6 +453,10 @@ class ArticleTagsTest(TestCase):
         user.first_name = 'John'
         user.last_name = 'Doe'
         user.save()
+
+    def test_tag_string(self):
+        tag = ArticleTag(title="This is a title")
+        self.assertTrue(str(tag) == "This is a title")
 
     def test_create_article_with_tags(self):
         self.client.login(username="testuser", password="testuser")
