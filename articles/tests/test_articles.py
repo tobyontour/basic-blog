@@ -122,17 +122,19 @@ class ArticleTest(TestCase):
             {
                 'title': 'New article',
                 'body': 'New article body',
-                'tags': 'tag 1, tag 2 ,tag3',
+                'tags_text': 'tag 1, tag 2 ,tag3',
             },
             follow=True)
 
         self.assertContains(response, 'New article')
-        print response.content
+
         self.assertTrue('article' in response.context)
         self.assertTrue(len(response.context['article'].tags.all()) == 3)
-        self.assertTrue('tag 1' in response.context['article'].tags.all())
-        self.assertTrue('tag 2' in response.context['article'].tags)
-        self.assertTrue('tag3' in response.context['article'].tags)
+
+        tags = [x.title for x in response.context['article'].tags.all()]
+        self.assertTrue('tag 1' in tags)
+        self.assertTrue('tag 2' in tags)
+        self.assertTrue('tag3' in tags)
 
         response = self.client.get('/articles/new-article')
 
@@ -441,3 +443,106 @@ class ArticleParsingTest(TestCase):
 Blah blah
 {image:12}
   {image:23}{image:45}'''), [12,23,45])
+
+
+class ArticleTagsTest(TestCase):
+
+    def setUp(self):
+        user = User.objects.create_user('testuser', email='testuser@example.com', password='testuser')
+        user.first_name = 'John'
+        user.last_name = 'Doe'
+        user.save()
+
+    def test_create_article_with_tags(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': 'tag 1, tag 2 ,tag3',
+            },
+            follow=True)
+
+        self.assertTemplateUsed(response, 'articles/article.html')
+        self.assertContains(response, 'New article')
+
+        self.assertTrue('article' in response.context)
+        self.assertTrue(len(response.context['article'].tags.all()) == 3)
+
+        tags = [x.title for x in response.context['article'].tags.all()]
+        self.assertTrue('tag 1' in tags)
+        self.assertTrue('tag 2' in tags)
+        self.assertTrue('tag3' in tags)
+
+    def test_update_article_with_tags(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': 'tag 1, tag 2 ,tag3',
+            },
+            follow=True)
+
+        self.assertTemplateUsed(response, 'articles/article.html')
+        self.assertContains(response, 'New article')
+
+        response = self.client.get('/articles/new-article/edit')
+
+        self.assertContains(response, 'id_tags_text')
+
+        response = self.client.post('/articles/new-article/edit',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': 'tag 1, tag 4, tag 5',
+            },
+            follow=True)
+
+
+        self.assertTrue('article' in response.context)
+        tags = [x.title for x in response.context['article'].tags.all()]
+
+        self.assertTrue(len(tags) == 3)
+        self.assertTrue('tag 1' in tags)
+        self.assertTrue('tag 2' not in tags)
+        self.assertTrue('tag 3' not in tags)
+        self.assertTrue('tag 4' in tags)
+        self.assertTrue('tag 5' in tags)
+
+    def test_update_article_with_notags(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': 'tag 1, tag 2 ,tag3',
+            },
+            follow=True)
+
+        self.assertTemplateUsed(response, 'articles/article.html')
+        self.assertContains(response, 'New article')
+
+        response = self.client.get('/articles/new-article/edit')
+
+        self.assertContains(response, 'id_tags_text')
+
+        response = self.client.post('/articles/new-article/edit',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': '',
+            },
+            follow=True)
+
+        self.assertTrue('article' in response.context)
+        self.assertContains(response, "Article updated")
+        tags = [x.title for x in response.context['article'].tags.all()]
+
+        self.assertTrue(len(tags) == 0)
+        self.assertTrue('tag 1' not in tags)
+        self.assertTrue('tag 4' not in tags)
+        self.assertTrue('tag 5' not in tags)

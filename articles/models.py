@@ -9,8 +9,12 @@ from django.utils.encoding import python_2_unicode_compatible
 from django import forms
 
 
+@python_2_unicode_compatible
 class ArticleTag(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.title
 
 @python_2_unicode_compatible
 class Article(models.Model):
