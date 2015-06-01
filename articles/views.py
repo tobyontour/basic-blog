@@ -183,6 +183,11 @@ class ArticleListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(ArticleListView, self).get_context_data(**kwargs)
+        page = Article.objects.filter(slug='articles').filter(published=True).filter(is_page=True)
+        if len(page) > 0:
+             context['page'] = page[0]
+             context['page_image'] = page[0].image
+
         return context
 
 class PageListView(LoginRequiredMixin, ListView):

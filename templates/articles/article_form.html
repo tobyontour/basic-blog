@@ -23,6 +23,7 @@
   </ul>
 </div>
 <div class="col-lg-8 col-md-10 body">
+    <span>The page that has the slug of 'home' will be the home page.</span>
 	{{ form.errors }}
 	<form role="form" method="post" enctype="multipart/form-data" action="{% if article %}{% url 'articles:edit' article.slug %}{% else %}{% url 'articles:new' %}{% endif %}">{% csrf_token %}
 	  {% bootstrap_form form layout='inline' %}

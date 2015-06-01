@@ -8,19 +8,17 @@
 
 {% block content %}
 {% if home_article %}
-  <div class="col-lg-8 col-lg-offset-2 col-md-12 col-md-offset-0 col-sm-10 col-sm-offset-1">
-  {% comment %}
-    <div class="visible-xs">XS</div> <div class="visible-sm">SM</div> <div class="visible-md">MD</div> <div class="visible-lg">LG</div>
-  {% endcomment %}
+  <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+    {#<div class="visible-xs">XS</div> <div class="visible-sm">SM</div> <div class="visible-md">MD</div> <div class="visible-lg">LG</div>#}
     <div class="body">{{ home_article.body | markdown }}</div>
   </div>
 </div>
 <hr>
-<div class="row">
 {% endif %}
-{% for article in articles %}
- {% if forloop.counter == 1 or forloop.counter == 2 %}
-  <div class="col-lg-6 col-md-6 col-md-offset-0 col-sm-10 col-sm-offset-1">
+<div class="row">
+  <div class="col-lg-2 col-md-1"></div>
+  {% for article in articles|slice:":2" %}
+  <div class="col-lg-4 col-md-5 col-md-offset-0 col-sm-10 col-sm-offset-1">
     <div class="post-preview">
       {% thumbnail article.image "600x200" crop="center" as im %}<img src="{{ im.url }}">{% endthumbnail %}
       <a href="{% url 'articles:view' article.slug %}">
@@ -34,27 +32,32 @@
         {% endif %}
       </a>
       <p class="post-meta">Posted by <a href="#">{{ article.author }}</a> on {{ article.created }}</p>
-      {#<div class="body">{{ article.body | markdown | truncatewords_html:20 }}</div>#}
+      <div class="body">{{ article.body | markdown | truncatewords_html:20 }}</div>
     </div>
   </div>
- {% else %}
-  <div class="col-lg-4 col-md-6 col-md-offset-0 col-sm-10 col-sm-offset-1">
-    <div class="post-preview">
-      {% thumbnail article.image "455x200" crop="center" as im %}<img src="{{ im.url }}">{% endthumbnail %}
-      <a href="{% url 'articles:view' article.slug %}">
-        <h3 class="post-title">
-          {{ article.title }}
-        </h3>
-        {% if article.subheading %}
-        <em class="post-subtitle">
-          {{ article.subheading }}
-        </em>
-        {% endif %}
-      </a>
+  {% endfor %}
+</div>
+<hr>
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-offset-1 col-sm-10">
+    <div class="row">
+      {% for article in articles|slice:"2:" %}
+      <div class="col-sm-4">
+        <div class="post-preview">
+          {# {% thumbnail article.image "455x200" crop="center" as im %}<img src="{{ im.url }}">{% endthumbnail %} #}
+          <a href="{% url 'articles:view' article.slug %}">
+
+            <h4 class="post-title visible-lg">{{ article.title }}</h4>
+            <h4 class="post-title visible-md visible-sm visible-xs" style="font-size: 110%">{{ article.title }}</h4>
+            {% if article.subheading %}
+            <em class="post-subtitle">{{ article.subheading }}</em>
+            {% endif %}
+          </a>
+        </div>
+      </div>
+      {% endfor %}
     </div>
   </div>
- {% endif %}
-{% endfor %}
 </div>
 <div class="row">
 <hr>

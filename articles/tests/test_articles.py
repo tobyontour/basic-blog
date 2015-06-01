@@ -313,6 +313,24 @@ class ArticleTest(TestCase):
 
         self.assertTrue(len(response.context['articles']) == number_of_articles)
 
+    def test_article_list_page_article(self):
+        self.create_articles(number_of_articles=10)
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'This is the article list page',
+                'body': 'The quick brown fox',
+                'published': True,
+                'is_page': True,
+                'slug': 'articles',
+            },
+            follow=True)
+
+        response = self.client.get('/articles/')
+        self.assertTrue(response.context['page'].title == 'This is the article list page')
+        self.assertTrue(response.context['page'].body == 'The quick brown fox')
+
     def test_article_body_uses_markdown(self):
         self.client.login(username="testuser", password="testuser")
 
