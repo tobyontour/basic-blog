@@ -186,7 +186,7 @@ class ArticleListView(ListView):
         page = Article.objects.filter(slug='articles').filter(published=True).filter(is_page=True)
         if len(page) > 0:
              context['page'] = page[0]
-             context['page_image'] = page[0].image
+             context['header_image'] = page[0].image
 
         return context
 
