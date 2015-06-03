@@ -188,6 +188,13 @@ class ArticleListView(ListView):
              context['page'] = page[0]
              context['header_image'] = page[0].image
 
+        context['popular_tags'] = [] 
+        for tag in ArticleTag.objects.all():
+            context['popular_tags'].append({
+                'tag': tag,
+                'count': tag.article_set.count()
+                })
+
         return context
 
 class PageListView(LoginRequiredMixin, ListView):
@@ -273,4 +280,5 @@ class ArticleTagView(ListView):
     def get_context_data(self, **kwargs):
         context = super(ArticleTagView, self).get_context_data(**kwargs)
         context['tag'] = get_object_or_404(ArticleTag, slug=self.kwargs['slug'])
+
         return context

@@ -654,4 +654,47 @@ class ArticleTagsTest(TestCase):
 
         response = self.client.get('/articles/article-1')
         self.assertContains(response, reverse('articles:tag-view', kwargs={'slug': 'tag-1'}))
- 
+
+    def test_popular_tags(self):
+        self.client.login(username="testuser", password="testuser")
+
+        tags = {
+          'taga': 0,
+          'tagb': 0,
+          'tagc': 0,
+          'tagd': 0,
+        }
+        for i in range(1, 10):
+            text = 'taga'
+            tags['taga'] += 1
+            if i > 2:
+                text = text + ',tagb'
+                tags['tagb'] += 1
+            if i > 4:
+                text = text + ',tagc'
+                tags['tagc'] += 1
+            if i > 6:
+                text = text + ',tagd'
+                tags['tagd'] += 1
+
+            response = self.client.post('/articles/new',
+                {
+                    'title': 'Article %d' % i, 'body': 'Article body',
+                    'tags_text': text,
+                    'published': True,
+                },
+                follow=True)
+
+        #print ArticleTag.objects.all()
+        #print tags
+
+        # for tag in ArticleTag.objects.all():
+        #     print tag.title, tag.article_set.count()
+
+        response = self.client.get('/articles/')
+        for t in response.context['popular_tags']:
+            if t['tag'].title in tags and t['count'] == tags[t['tag'].title]:
+                del tags[t['tag'].title] 
+
+        self.assertTrue(tags == {})
+

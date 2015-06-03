@@ -15,6 +15,7 @@
 </div>
 <hr>
 {% endif %}
+
 {% if object_list %}
 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
   {% for article in object_list %}
@@ -39,4 +40,15 @@
   {% endfor %}
 </div>
 {% endif %}
+
+{% if popular_tags %}
+<div class="col-lg-2 col-md-1">
+  <ul>
+  {% for t in popular_tags %}
+    {{ t.tag.title }} {{ t.count }}
+  {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
 {% endblock %}
