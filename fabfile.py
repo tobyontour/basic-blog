@@ -112,3 +112,4 @@ def deploy(server='test'):
         run("SECRET_KEY=%(SECRET_KEY)s %(venv)s/bin/python %(project)s/manage.py collectstatic --noinput --settings=%(settings)s" % context)
         with shell_env(DB_NAME=context['DB_NAME'], DB_USER=context['DB_USER'], DB_PASS=context['DB_PASS'], DB_HOST=context['DB_HOST']):
             run("SECRET_KEY=%(SECRET_KEY)s %(venv)s/bin/python %(project)s/manage.py migrate --settings=%(settings)s" % context)
+        run("pkill python")
