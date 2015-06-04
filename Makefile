@@ -32,3 +32,7 @@ coverage:
 
 clean:
 	find . -name "*.pyc" -delete
+	find cache -name "*.djcache" -delete
+
+flush:
+	find cache -name "*.djcache" -delete

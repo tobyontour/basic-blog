@@ -103,6 +103,7 @@ def deploy(server='test'):
         # Make sure that the media directory exists
         run("mkdir -p public/media")
         run("mkdir -p public/static")
+        run("mkdir -p cache")
         run("rm -rf %(project)s" % context)
         # run("git clone https://%(gituser)s@bitbucket.org/%(gituser)s/%s(project)" % context)
         run("git clone git://github.com/%(gituser)s/%(project)s.git" % context)

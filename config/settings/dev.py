@@ -37,20 +37,20 @@ LOGGING['loggers']['articles'] = {
     'propagate': True,
 }
 
-CACHES = {
-    'default': {
-        # 'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        # 'LOCATION': os.path.join(BASE_DIR, 'logs/cache'),
-        # 'TIMEOUT': 3600,
-        # 'OPTIONS': {
-        #     'MAX_ENTRIES': 5000,
-        #     'CULL_FREQUENCY': 5,
-        # }
-        #'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': [
-            '127.0.0.1:11211',
-        ]
-    }
-}
+# CACHES = {
+#     'default': {
+#         # 'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+#         # 'LOCATION': os.path.join(BASE_DIR, 'logs/cache'),
+#         # 'TIMEOUT': 3600,
+#         # 'OPTIONS': {
+#         #     'MAX_ENTRIES': 5000,
+#         #     'CULL_FREQUENCY': 5,
+#         # }
+#         #'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+#         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+#         'LOCATION': [
+#             '127.0.0.1:11211',
+#         ]
+#     }
+# }
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
