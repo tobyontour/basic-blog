@@ -3,10 +3,11 @@ Tests for Articles
 """
 import datetime, os
 from django.test import TestCase
-from articles.models import Article
+from articles.models import Article, ArticleTag
 from django.contrib.auth.models import User
 from articles.views import _get_images_in_text
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.urlresolvers import reverse
 
 
 class ArticleTest(TestCase):
@@ -115,6 +116,28 @@ class ArticleTest(TestCase):
         self.assertContains(response, 'New article')
         self.assertNotContains(response, 'id_title')
 
+    def test_create_article_with_tags(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': 'tag 1, tag 2 ,tag3',
+            },
+            follow=True)
+
+        self.assertContains(response, 'New article')
+
+        self.assertTrue('article' in response.context)
+        self.assertTrue(len(response.context['article'].tags.all()) == 3)
+
+        tags = [x.title for x in response.context['article'].tags.all()]
+        self.assertTrue('tag 1' in tags)
+        self.assertTrue('tag 2' in tags)
+        self.assertTrue('tag3' in tags)
+
+        response = self.client.get('/articles/new-article')
 
     def test_create_article_not_logged_in(self):
         response = self.client.get('/articles/new', follow=True)
@@ -290,6 +313,24 @@ class ArticleTest(TestCase):
 
         self.assertTrue(len(response.context['articles']) == number_of_articles)
 
+    def test_article_list_page_article(self):
+        self.create_articles(number_of_articles=10)
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'This is the article list page',
+                'body': 'The quick brown fox',
+                'published': True,
+                'is_page': True,
+                'slug': 'articles',
+            },
+            follow=True)
+
+        response = self.client.get('/articles/')
+        self.assertTrue(response.context['page'].title == 'This is the article list page')
+        self.assertTrue(response.context['page'].body == 'The quick brown fox')
+
     def test_article_body_uses_markdown(self):
         self.client.login(username="testuser", password="testuser")
 
@@ -421,3 +462,239 @@ class ArticleParsingTest(TestCase):
 Blah blah
 {image:12}
   {image:23}{image:45}'''), [12,23,45])
+
+
+class ArticleTagsTest(TestCase):
+
+    def setUp(self):
+        user = User.objects.create_user('testuser', email='testuser@example.com', password='testuser')
+        user.first_name = 'John'
+        user.last_name = 'Doe'
+        user.save()
+
+    def test_tag_string(self):
+        tag = ArticleTag(title="This is a title")
+        self.assertTrue(str(tag) == "This is a title")
+
+    def test_create_article_with_tags(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': 'tag 1, tag 2 ,tag3',
+            },
+            follow=True)
+
+        self.assertTemplateUsed(response, 'articles/article.html')
+        self.assertContains(response, 'New article')
+
+        self.assertTrue('article' in response.context)
+        self.assertTrue(len(response.context['article'].tags.all()) == 3)
+
+        tags = [x.title for x in response.context['article'].tags.all()]
+        self.assertTrue('tag 1' in tags)
+        self.assertTrue('tag 2' in tags)
+        self.assertTrue('tag3' in tags)
+
+    def test_update_article_with_tags(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': 'tag 1, tag 2 ,tag3',
+            },
+            follow=True)
+
+        self.assertTemplateUsed(response, 'articles/article.html')
+        self.assertContains(response, 'New article')
+
+        response = self.client.get('/articles/new-article/edit')
+
+        self.assertContains(response, 'id_tags_text')
+
+        response = self.client.post('/articles/new-article/edit',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': 'tag 1, tag 4, tag 5',
+            },
+            follow=True)
+
+        self.assertTrue('article' in response.context)
+        self.assertTemplateUsed(response, 'articles/article.html')
+        tags = [x.title for x in response.context['article'].tags.all()]
+
+        self.assertTrue(len(tags) == 3)
+        self.assertTrue('tag 1' in tags)
+        self.assertTrue('tag 2' not in tags)
+        self.assertTrue('tag 3' not in tags)
+        self.assertTrue('tag 4' in tags)
+        self.assertTrue('tag 5' in tags)
+
+        # Check the tags appear in the template
+        self.assertContains(response, 'tag 1')
+        self.assertContains(response, 'tag 4')
+        self.assertContains(response, 'tag 5')
+
+    def test_update_article_with_notags(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': 'tag 1, tag 2 ,tag3',
+            },
+            follow=True)
+
+        self.assertTemplateUsed(response, 'articles/article.html')
+        self.assertContains(response, 'New article')
+
+        response = self.client.get('/articles/new-article/edit')
+
+        self.assertContains(response, 'id_tags_text')
+        self.assertContains(response, 'tag 1')
+        self.assertContains(response, 'tag 2')
+        self.assertContains(response, 'tag3')
+
+        response = self.client.post('/articles/new-article/edit',
+            {
+                'title': 'New article',
+                'body': 'New article body',
+                'tags_text': '',
+            },
+            follow=True)
+
+        self.assertTrue('article' in response.context)
+        self.assertContains(response, "Article updated")
+        tags = [x.title for x in response.context['article'].tags.all()]
+
+        self.assertTrue(len(tags) == 0)
+        self.assertTrue('tag 1' not in tags)
+        self.assertTrue('tag 4' not in tags)
+        self.assertTrue('tag 5' not in tags)
+
+    def test_tag_view(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Article 1',
+                'body': 'Article body',
+                'tags_text': 'tag 1, tag 2, tag 3',
+                'published': True,
+            },
+            follow=True)
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Article 2',
+                'body': 'Article body',
+                'tags_text': 'tag 2, tag 3',
+                'published': True,
+            },
+            follow=True)
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Article 3',
+                'body': 'Article body',
+                'tags_text': 'tag 3',
+                'published': True,
+            },
+            follow=True)
+
+        response = self.client.get('/articles/tags/tag-1')
+        self.assertContains(response, "Article 1")
+        self.assertNotContains(response, "Article 2")
+        self.assertNotContains(response, "Article 3")
+
+        response = self.client.get('/articles/tags/tag-2')
+        self.assertContains(response, "Article 1")
+        self.assertContains(response, "Article 2")
+        self.assertNotContains(response, "Article 3")
+
+        response = self.client.get('/articles/tags/tag-3')
+        self.assertContains(response, "Article 1")
+        self.assertContains(response, "Article 2")
+        self.assertContains(response, "Article 3")
+
+        self.assertContains(response, "<h1>tag 3</h1>")
+
+    def test_non_existent_tag_view(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Article 1',
+                'body': 'Article body',
+                'tags_text': 'tag 1, tag 2, tag 3',
+                'published': True,
+            },
+            follow=True)
+
+        response = self.client.get('/articles/tags/tag-4')
+        self.assertTrue(response.status_code == 404)
+
+    def test_tag_link_on_article(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Article 1',
+                'body': 'Article body',
+                'tags_text': 'tag 1, tag 2, tag 3',
+                'published': True,
+            },
+            follow=True)
+
+        response = self.client.get('/articles/article-1')
+        self.assertContains(response, reverse('articles:tag-view', kwargs={'slug': 'tag-1'}))
+
+    def test_popular_tags(self):
+        self.client.login(username="testuser", password="testuser")
+
+        tags = {
+          'taga': 0,
+          'tagb': 0,
+          'tagc': 0,
+          'tagd': 0,
+        }
+        for i in range(1, 10):
+            text = 'taga'
+            tags['taga'] += 1
+            if i > 2:
+                text = text + ',tagb'
+                tags['tagb'] += 1
+            if i > 4:
+                text = text + ',tagc'
+                tags['tagc'] += 1
+            if i > 6:
+                text = text + ',tagd'
+                tags['tagd'] += 1
+
+            response = self.client.post('/articles/new',
+                {
+                    'title': 'Article %d' % i, 'body': 'Article body',
+                    'tags_text': text,
+                    'published': True,
+                },
+                follow=True)
+
+        #print ArticleTag.objects.all()
+        #print tags
+
+        # for tag in ArticleTag.objects.all():
+        #     print tag.title, tag.article_set.count()
+
+        response = self.client.get('/articles/')
+        for t in response.context['popular_tags']:
+            if t['tag'].title in tags and t['count'] == tags[t['tag'].title]:
+                del tags[t['tag'].title] 
+
+        self.assertTrue(tags == {}, msg=str(tags))
+

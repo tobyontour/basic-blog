@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load markdown_deux_tags %}
+{% load article_tags %}
 
 {% block title %}{{ article.title }}{% endblock %}
 {% block page_title %}{{ article.title }}{% endblock %}
@@ -10,7 +11,7 @@
 
 {% block content %}
 <div class="col-lg-2 col-md-1">
-  {% if user == article.author %}
+  {% if not user.is_anonymous and user == article.author %}
   <ul class="nav nav-pills nav-stacked">
     <li class="active"><a href="{% url 'articles:view' article.slug %}">View</a></li>
     <li><a href="{% url 'articles:edit' article.slug %}">Edit</a></li>
@@ -21,6 +22,11 @@
 </div>
 <div class="col-lg-8 col-md-10 body">
   {{ body |markdown }}
+</div>
+<div class="col-lg-2 col-md-1">
+  {% if article.tags %}
+  {% tag_list article.tags %}
+  {% endif %}
 </div>
 {% if DISQUS_SHORTNAME %}
   {% include "articles/disqus.html" with disqus_shortname="DISQUS_SHORTNAME" %}

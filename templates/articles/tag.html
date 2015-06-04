@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% load markdown_deux_tags %}
+
+{% block title %}{{ tag.title }}{% endblock %}
+{% block page_title %}{{ tag.title }}{% endblock %}
+{% block page_subheading %}Articles tagged with {{ tag.title }}{% endblock %}
+{% block extra_heading %}{% endblock %}
+
+{% block content %}
+{% if object_list %}
+<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+  {% for article in object_list %}
+    <div class="post-preview">
+      <img src="{% thumbnail article.image "200x200" as im %}{{ im.url }}{% endthumbnail %}">
+      <a href="{% url 'articles:view' article.slug %}">
+        <h2 class="post-title">
+          {{ article.title }}
+        </h2>
+        {% if article.subheading %}
+        <h3 class="post-subtitle">
+          {{ article.subheading }}
+        </h3>
+        {% endif %}
+      </a>
+      <p class="post-meta">Posted by <a href="#">{{ article.author }}</a> on {{ article.created }}</p>
+    </div>
+    <hr>
+  {% empty %}
+    <p>No articles</p>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

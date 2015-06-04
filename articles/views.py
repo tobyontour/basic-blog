@@ -1,4 +1,5 @@
 import re
+import logging
 
 # Create your views here.
 from django import forms
@@ -13,7 +14,11 @@ from django.contrib import messages
 from django.views.decorators.cache import cache_page, never_cache
 from django.template import RequestContext, loader
 from django.db.models import Count
+from django.forms import ModelForm
 
+from django.core.cache import caches
+
+from django.utils.text import slugify
 from django.views.generic import View
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
@@ -21,11 +26,16 @@ from django.views.generic.edit import DeleteView, UpdateView, CreateView, FormVi
 from django.utils import timezone
 from django.conf import settings
 from django.forms.formsets import formset_factory
+from django.forms.models import modelform_factory
 
 from braces.views import LoginRequiredMixin
 
 from articles.forms import ArticleForm, ArticleImageForm
-from articles.models import Article, ArticleImage
+from articles.models import Article, ArticleImage, ArticleTag
+
+logger = logging.getLogger(__name__)
+
+cache = caches['default']
 
 def _get_images_in_text(text):
     m = re.findall(r"\{image:(?P<image_number>\d+)\}", text)
@@ -34,11 +44,62 @@ def _get_images_in_text(text):
         ret.append(int(number))
     return ret
 
+class ArticleForm(ModelForm):
+    class Meta:
+        model = Article
+        fields = ('title', 'subheading', 'body', 'image', 'slug', 'published', 'is_page')
+
+    def __init__(self, *args, **kwargs):
+        super(ArticleForm, self).__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            tags = ", ".join([x.title for x in self.instance.tags.all()])
+        else:
+            tags = ""
+        self.fields['tags_text'] = forms.CharField(label="Tags", required=False, initial=tags)
+
+    def clean_tags_text(self):
+        raw = self.cleaned_data['tags_text']
+
+        csv = []
+        for tag in raw.split(','):
+            if len(tag.strip()) > 0:
+                csv.append(tag.strip())
+
+        # Deduplicate
+        self.cleaned_data['tags_text'] = list(set(csv))
+        return self.cleaned_data['tags_text']
+
+    def save(self, force_insert=False, force_update=False, commit=True):
+        article = super(ArticleForm, self).save(commit=True)  # have to save to access article.tags
+     
+        # Get the tags we want
+        tags_text_list = self.cleaned_data['tags_text']
+
+        # See which ones exist
+        tags = ArticleTag.objects.filter(title__in=tags_text_list)
+
+        # Start from scratch
+        article.tags.clear()
+
+        # Add existing tags
+        for tag in tags:
+            article.tags.add(tag.pk)
+
+        # Create new ones
+        for tag in tags_text_list:
+            if tag not in [t.title for t in tags]:
+                # Create tag
+                article.tags.create(title=tag, slug=slugify(tag))
+
+        if commit:
+            article.save()
+        return article
 
 class ArticleCreateView(LoginRequiredMixin, CreateView):
     model = Article
+    form_class = ArticleForm
     template_name = 'articles/article_form.html'
-    fields = ['title', 'subheading', 'body','image','slug','published','is_page']
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.INFO, 'Article saved')
@@ -48,13 +109,18 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
 class ArticleUpdateView(LoginRequiredMixin, UpdateView):
     model = Article
     template_name = 'articles/article_form.html'
-    fields = ['title', 'subheading', 'body','image','slug','published','is_page']
+    form_class = ArticleForm
+    # fields = ['title', 'subheading', 'body','image','slug','published','is_page', 'tags']
     context_object_name = 'article'
 
     def get_context_data(self, **kwargs):
         context = super(ArticleUpdateView, self).get_context_data(**kwargs)
         context['header_image'] = context[self.context_object_name].image
         return context
+
+    def form_valid(self, form):
+        messages.add_message(self.request, messages.INFO, 'Article updated')
+        return super(ArticleUpdateView, self).form_valid(form)
 
 class ArticleView(DetailView):
     template_name = 'articles/article.html'
@@ -124,6 +190,23 @@ class ArticleListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(ArticleListView, self).get_context_data(**kwargs)
+        page = Article.objects.filter(slug='articles').filter(published=True).filter(is_page=True)
+        if len(page) > 0:
+             context['page'] = page[0]
+             context['header_image'] = page[0].image
+
+        logger.warn("Horribly inefficient query here")
+        pt = cache.get('popular_tags')
+        if pt is None:
+            pt = []
+            for tag in ArticleTag.objects.all():
+                pt.append({
+                    'tag': tag,
+                    'count': tag.article_set.count()
+                    })
+            cache.set('popular_tags', pt, 3600)
+        context['popular_tags'] = pt
+
         return context
 
 class PageListView(LoginRequiredMixin, ListView):
@@ -195,4 +278,19 @@ class ArticleImageDeleteView(LoginRequiredMixin, DeleteView):
         context = super(ArticleImageDeleteView, self).get_context_data( **kwargs)
 
         context['header_image'] = context[self.context_object_name].image
+        return context
+
+class ArticleTagView(ListView):
+    model = Article
+    template_name = 'articles/tag.html'
+    context_object_name = 'articles'
+
+    def get_queryset(self):
+        queryset = super(ArticleTagView, self).get_queryset()
+        return queryset.filter(tags__slug=self.kwargs['slug']).filter(is_page=False).filter(published=True)
+
+    def get_context_data(self, **kwargs):
+        context = super(ArticleTagView, self).get_context_data(**kwargs)
+        context['tag'] = get_object_or_404(ArticleTag, slug=self.kwargs['slug'])
+
         return context

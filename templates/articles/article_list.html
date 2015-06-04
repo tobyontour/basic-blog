@@ -3,16 +3,24 @@
 {% load markdown_deux_tags %}
 
 {% block title %}Articles{% endblock %}
-{% block page_title %}Articles{% endblock %}
-{% block page_subheading %}{% endblock %}
+{% block page_title %}{% if page %}{{ page.title }}{% else %}Articles{% endif %}{% endblock %}
+{% block page_subheading %}{{ page.subheading }}{% endblock %}
 {% block extra_heading %}{% endblock %}
 
 {% block content %}
+{% if page %}
+  <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+    <div class="body">{{ page.body | markdown }}</div>
+  </div>
+</div>
+<hr>
+{% endif %}
+
 {% if object_list %}
 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
   {% for article in object_list %}
     <div class="post-preview">
-      <img src="{% thumbnail article.image "200x200" as im %}{{ im.url }}{% endthumbnail %}">
+      {#<img src="{% thumbnail article.image "200x200" as im %}{{ im.url }}{% endthumbnail %}">#}
       <a href="{% url 'articles:view' article.slug %}">
         <h2 class="post-title">
           {{ article.title }}
@@ -24,6 +32,7 @@
         {% endif %}
       </a>
       <p class="post-meta">Posted by <a href="#">{{ article.author }}</a> on {{ article.created }}</p>
+      <div class="body">{{ article.body | markdown | truncatewords_html:20 }}</div>
     </div>
     <hr>
   {% empty %}
@@ -31,4 +40,17 @@
   {% endfor %}
 </div>
 {% endif %}
+
+{% if popular_tags %}
+<div class="col-lg-2 col-md-1">
+  <ul class="list-unstyled">
+  {% for t in popular_tags %}
+    <li><a class="btn btn-sm" href="{% url 'articles:tag-view' t.tag.slug %}">
+    {{ t.tag.title }} ({{ t.count }})
+    </a></li>
+  {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
 {% endblock %}
