@@ -696,5 +696,5 @@ class ArticleTagsTest(TestCase):
             if t['tag'].title in tags and t['count'] == tags[t['tag'].title]:
                 del tags[t['tag'].title] 
 
-        self.assertTrue(tags == {})
+        self.assertTrue(tags == {}, msg=str(tags))
 

@@ -1,6 +1,6 @@
 <span class="glyphicon glyphicon-tags"></span>
 <ul class="list-unstyled">
 {% for tag in tags.all %}
-  <li><a  class="btn btn-sm" href="{% url 'articles:tag-view' tag.slug %}">{{ tag.title }}</a></li>
+  <li><a class="btn btn-sm" href="{% url 'articles:tag-view' tag.slug %}">{{ tag.title }}</a></li>
 {% endfor %}
 </ul>

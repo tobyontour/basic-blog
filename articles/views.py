@@ -1,4 +1,5 @@
 import re
+import logging
 
 # Create your views here.
 from django import forms
@@ -15,6 +16,8 @@ from django.template import RequestContext, loader
 from django.db.models import Count
 from django.forms import ModelForm
 
+from django.core.cache import caches
+
 from django.utils.text import slugify
 from django.views.generic import View
 from django.views.generic.detail import DetailView
@@ -29,6 +32,10 @@ from braces.views import LoginRequiredMixin
 
 from articles.forms import ArticleForm, ArticleImageForm
 from articles.models import Article, ArticleImage, ArticleTag
+
+logger = logging.getLogger(__name__)
+
+cache = caches['default']
 
 def _get_images_in_text(text):
     m = re.findall(r"\{image:(?P<image_number>\d+)\}", text)
@@ -188,12 +195,17 @@ class ArticleListView(ListView):
              context['page'] = page[0]
              context['header_image'] = page[0].image
 
-        context['popular_tags'] = [] 
-        for tag in ArticleTag.objects.all():
-            context['popular_tags'].append({
-                'tag': tag,
-                'count': tag.article_set.count()
-                })
+        logger.warn("Horribly inefficient query here")
+        pt = cache.get('popular_tags')
+        if pt is None:
+            pt = []
+            for tag in ArticleTag.objects.all():
+                pt.append({
+                    'tag': tag,
+                    'count': tag.article_set.count()
+                    })
+            cache.set('popular_tags', pt, 3600)
+        context['popular_tags'] = pt
 
         return context
 
