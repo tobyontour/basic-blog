@@ -21,7 +21,7 @@ test:
 	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py test $(APPS) --settings=$(SETTINGS) --failfast
 
 citest:
-	find cache -name "*.djcache" -delete
+	find cache -name "*.djcache" -delete || true
 	@# Runs tests with coverage
 	SECRET_KEY=$(SECRET_KEY) coverage run manage.py test $(APPS) --settings=$(SETTINGS)
 
