@@ -21,10 +21,11 @@
     <link href="{% static "css/clean-blog.min.css" %}" rel="stylesheet">
 
     <!-- Custom Fonts -->
+    {% comment %}
     <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-
+    {% endcomment %}
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
 
@@ -57,17 +58,9 @@
               <a href="{% url 'home' %}">Home</a>
             </li>
             <li><a href="{% url 'articles:list' %}">Articles</a></li>
-            <li>
-              <a href="{% url 'page-view' 'about' %}">About</a>
-            </li>
-            {% comment %}
-            <li>
-              <a href="{% url 'page-view' 'portfolio' %}">About</a>
-            </li>
-            <li>
-              <a href="contact.html">Contact</a>
-            </li>
-            {% endcomment %}
+            {% for p in menu_pages %}
+            <li><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></li>
+            {% endfor %}
             {% if user.is_authenticated %}
             <li><a href="{% url 'profile' %}">{{ user.username }}</a></li>
             <li><a href="{% url 'articles:new' %}">New article</a></li>

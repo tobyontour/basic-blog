@@ -446,6 +446,50 @@ Header
         self.assertTrue(response.context['home_article'].title == 'Home page article')
         self.assertTrue(response.context['home_article'].body == 'New home page body')
 
+    def test_page_appears_in_menu(self):
+        self.client.login(username="testuser", password="testuser")
+
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Home',
+                'body': 'The quick brown fox',
+                'published': True,
+                'is_page': True,
+                'slug': 'home',
+            },
+            follow=True)
+        response = self.client.post('/articles/new',
+            {
+                'title': 'Articles',
+                'body': 'The quick brown fox',
+                'published': True,
+                'is_page': True,
+                'slug': 'articles',
+            },
+            follow=True)
+        response = self.client.post('/articles/new',
+            {
+                'title': 'This is the test page',
+                'body': 'The quick brown fox',
+                'published': True,
+                'is_page': True,
+                'slug': 'test',
+            },
+            follow=True)
+
+        test_page = response.context['page']
+        response = self.client.get('/articles/')
+
+        self.assertTrue('menu_pages' in response.context)
+        passed = False
+        for page in response.context['menu_pages']:
+            self.assertFalse(page.slug in ['home', 'articles'], msg="Home or articles page in menu")
+            if page.title == test_page.title and page.pk == test_page.pk:
+                passed = True
+
+        self.assertTrue(passed, msg="Static page did not appear in the menu")
+
+
 class ArticleParsingTest(TestCase):
 
     def test_text_parsing_for_images_1(self):
