@@ -128,6 +128,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.core.context_processors.request',
                 'config.views.site_metadata_processor',
+                'articles.menu_for_pages',
             ),
             'debug': DEBUG,
             'loaders': (
