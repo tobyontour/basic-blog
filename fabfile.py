@@ -107,7 +107,7 @@ def deploy(server='test'):
         run("rm -rf %(project)s" % context)
         # run("git clone https://%(gituser)s@bitbucket.org/%(gituser)s/%s(project)" % context)
         run("git clone git://github.com/%(gituser)s/%(project)s.git" % context)
-        run("%(venv)s/bin/pip install -r basic-blog/requirements.txt" % context)
+        run("%(venv)s/bin/pip install -r basic-blog/requirements.txt --allow-external mysql-connector-python" % context)
 
         run("SECRET_KEY=%(SECRET_KEY)s %(venv)s/bin/python %(project)s/manage.py collectstatic --noinput --settings=%(settings)s" % context)
         with shell_env(DB_NAME=context['DB_NAME'], DB_USER=context['DB_USER'], DB_PASS=context['DB_PASS'], DB_HOST=context['DB_HOST']):
