@@ -3,9 +3,9 @@ python:
   - "2.7"
 #  - "3.2"
 #  - "3.3"
-#  - "3.4"
+  - "3.4"
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install: "pip install -r requirements.txt --allow-external mysql-connector-python"
 # command to run tests
 script: 
   - make citest
