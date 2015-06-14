@@ -128,6 +128,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.core.context_processors.request',
                 'config.views.site_metadata_processor',
+                'articles.menu_for_pages',
             ),
             'debug': DEBUG,
             'loaders': (
@@ -169,7 +170,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': os.path.join(BASE_DIR, 'cache'),
-        'TIMEOUT': 3600,
+        'TIMEOUT': 600,
         'OPTIONS': {
             'MAX_ENTRIES': 5000,
             'CULL_FREQUENCY': 5,
