@@ -5,6 +5,7 @@ local.mk
 media
 htmlcov
 venv
+venv3
 db.sqlite
 .coverage
 secrets.json

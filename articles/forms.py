@@ -1,5 +1,5 @@
 from django import forms
-from models import Article, ArticleImage
+from .models import Article, ArticleImage
 
 class ArticleForm(forms.ModelForm):
     class Meta:

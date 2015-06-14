@@ -1,10 +1,11 @@
+from __future__ import unicode_literals
+
 import datetime, os
 from django.test import TestCase
 from articles.models import Article
 from django.contrib.auth.models import User
 from articles.views import _get_images_in_text
 from django.core.urlresolvers import reverse
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class ArticleImageTest(TestCase):
@@ -44,12 +45,11 @@ class ArticleImageTest(TestCase):
         self.assertContains(response, 'id_image')
 
         # Create an image
-        f = SimpleUploadedFile("file.txt", "file_content")
         response = self.client.post('/articles/images/new',
             {
                 'title': 'New image title',
                 'article': 1,
-                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'r'),
+                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'rb'),
             },
             follow=True)
 
@@ -66,12 +66,11 @@ class ArticleImageTest(TestCase):
         self.client.login(username="testuser", password="testuser")
 
         # Create an image
-        f = SimpleUploadedFile("file.txt", "file_content")
         response = self.client.post('/articles/images/new',
             {
                 'title': 'New image title',
                 'article': 1,
-                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'r'),
+                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'rb'),
             },
             follow=True)
 
@@ -99,12 +98,11 @@ class ArticleImageTest(TestCase):
         self.client.login(username="testuser", password="testuser")
 
         # Create an image
-        f = SimpleUploadedFile("file.txt", "file_content")
         response = self.client.post('/articles/images/new',
             {
                 'title': 'New image title',
                 'article': 1,
-                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'r'),
+                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'rb'),
             },
             follow=True)
         
@@ -131,12 +129,11 @@ class ArticleImageTest(TestCase):
         self.client.login(username="testuser", password="testuser")
 
         # Create an image
-        f = SimpleUploadedFile("file.txt", "file_content")
         response = self.client.post('/articles/images/new',
             {
                 'title': 'New image title',
                 'article': 1,
-                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'r'),
+                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'rb'),
             },
             follow=True)
         
@@ -155,12 +152,11 @@ class ArticleImageTest(TestCase):
         self.client.login(username="testuser", password="testuser")
 
         # Create an image
-        f = SimpleUploadedFile("file.txt", "file_content")
         response = self.client.post('/articles/images/new',
             {
                 'title': 'New image title',
                 'article': 1,
-                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'r'),
+                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'rb'),
             },
             follow=True)
         

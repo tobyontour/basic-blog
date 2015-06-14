@@ -6,7 +6,6 @@ from django.test import TestCase
 from articles.models import Article, ArticleTag
 from django.contrib.auth.models import User
 from articles.views import _get_images_in_text
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
 
@@ -66,24 +65,22 @@ class ArticleTest(TestCase):
                 })
 
         # Create an image
-        f = SimpleUploadedFile("file.txt", "file_content")
         response = self.client.post('/articles/images/new',
             {
                 'title': 'New image title',
                 'article': 1,
-                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'r'),
+                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'rb'),
             },
             follow=True)
 
         self.assertContains(response, 'New image title')
         img1 = response.context['image']
 
-        f = SimpleUploadedFile("file.txt", "file_content")
         response = self.client.post('/articles/images/new',
             {
                 'title': 'New second image title',
                 'article': 1,
-                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'r'),
+                'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'rb'),
             },
             follow=True)
 
