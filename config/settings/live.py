@@ -4,11 +4,10 @@ import os
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.mysql',   # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'ENGINE': 'mysql.connector.django',   # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME':     os.environ.get('DB_NAME'),  # Or path to database file if using sqlite3.
+        'NAME': os.environ.get('DB_NAME'),  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER':     os.environ.get('DB_USER'),
+        'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASS'),
         'HOST': os.environ.get('DB_HOST', ''),  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                             # Set to empty string for default.

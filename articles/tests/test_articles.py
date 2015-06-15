@@ -1,9 +1,9 @@
 """
 Tests for Articles
 """
-import datetime, os
+import os
 from django.test import TestCase
-from articles.models import Article, ArticleTag
+from articles.models import ArticleTag
 from django.contrib.auth.models import User
 from articles.views import _get_images_in_text
 from django.core.urlresolvers import reverse
@@ -20,11 +20,11 @@ class ArticleTest(TestCase):
     def create_articles(self, number_of_articles=1, published=True):
         self.client.login(username="testuser", password="testuser")
         for i in range(1, number_of_articles + 1):
-            response = self.client.post('/articles/new',
+            self.client.post('/articles/new',
                 {
                     'title': 'New article %d title' % i,
                     'body': 'New article %d body' % i,
-                    'published' : published
+                    'published': published
                 })
         self.client.logout()
 
@@ -47,7 +47,7 @@ class ArticleTest(TestCase):
         self.assertContains(response, 'New article')
         self.assertContains(response, 'New article body')
         self.assertTrue('article' in response.context)
-        self.assertTrue(response.context['article'].published == False)
+        self.assertTrue(response.context['article'].published is False)
         self.assertTrue(str(response.context['article']) == 'New article')
 
         response = self.client.get('/articles/new-article')
@@ -61,7 +61,7 @@ class ArticleTest(TestCase):
                 {
                     'title': 'New article title',
                     'body': 'With {image:1} and {image:2} so there.',
-                    'published' : True,
+                    'published': True,
                 })
 
         # Create an image
@@ -197,7 +197,6 @@ class ArticleTest(TestCase):
         self.assertContains(response, 'Updated title')
         self.assertContains(response, 'New article body updated')
 
-
     def test_update_article_not_logged_in(self):
         self.client.login(username="testuser", password="testuser")
 
@@ -242,12 +241,11 @@ class ArticleTest(TestCase):
 
         # Delete article
         response = self.client.post('/articles/new-article-2-title/delete',
-            {
-            },
+            {},
             follow=True)
- 
+
         response = self.client.get('/articles/new-article-2-title')
-        
+
         self.assertTrue(response.status_code == 404, msg="Expectec 404, got %d" % response.status_code)
         response = self.client.get('/articles/new-article-1-title')
         self.assertTrue(response.status_code == 200)
@@ -296,7 +294,7 @@ class ArticleTest(TestCase):
             {
                 'title': 'New article title',
                 'body': 'New article body',
-                'published' : True
+                'published': True
             },
             follow=True)
         self.client.logout()
@@ -387,7 +385,7 @@ Header
         self.assertContains(response, 'New page')
         self.assertContains(response, 'New page body')
         self.assertTrue('page' in response.context)
-        self.assertTrue(response.context['page'].published == True)
+        self.assertTrue(response.context['page'].published is True)
         self.assertTrue(str(response.context['page']) == 'New page')
 
         response = self.client.get('/articles/new-page')
@@ -420,11 +418,10 @@ Header
         self.assertTrue(len(response.context['articles']) == 2)
         self.assertTemplateUsed('articles/article_list.html')
 
-
     def test_home_page(self):
         self.create_articles(number_of_articles=10)
-        response = self.client.get('/')
-        
+        self.client.get('/')
+
     def test_home_page_article(self):
         self.create_articles(number_of_articles=10)
         self.client.login(username="testuser", password="testuser")
@@ -502,7 +499,7 @@ class ArticleParsingTest(TestCase):
         self.assertEquals(_get_images_in_text('''
 Blah blah
 {image:12}
-  {image:23}{image:45}'''), [12,23,45])
+  {image:23}{image:45}'''), [12, 23, 45])
 
 
 class ArticleTagsTest(TestCase):
@@ -700,10 +697,10 @@ class ArticleTagsTest(TestCase):
         self.client.login(username="testuser", password="testuser")
 
         tags = {
-          'taga': 0,
-          'tagb': 0,
-          'tagc': 0,
-          'tagd': 0,
+            'taga': 0,
+            'tagb': 0,
+            'tagc': 0,
+            'tagd': 0,
         }
         for i in range(1, 10):
             text = 'taga'
@@ -726,16 +723,9 @@ class ArticleTagsTest(TestCase):
                 },
                 follow=True)
 
-        #print ArticleTag.objects.all()
-        #print tags
-
-        # for tag in ArticleTag.objects.all():
-        #     print tag.title, tag.article_set.count()
-
         response = self.client.get('/articles/')
         for t in response.context['popular_tags']:
             if t['tag'].title in tags and t['count'] == tags[t['tag'].title]:
-                del tags[t['tag'].title] 
+                del tags[t['tag'].title]
 
         self.assertTrue(tags == {}, msg=str(tags))
-
