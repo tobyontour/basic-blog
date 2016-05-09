@@ -14,6 +14,9 @@ class ArticleTag(models.Model):
     title = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=50, blank=False, unique=True)
 
+    class Meta:
+        app_label = 'articles'
+
     def __str__(self):
         return self.title
 
@@ -39,6 +42,9 @@ class Article(models.Model):
     published = models.BooleanField(default=False)
     is_page = models.BooleanField(default=False)
     tags = models.ManyToManyField(ArticleTag, blank=True)
+
+    class Meta:
+        app_label = 'articles'
 
     def __str__(self):
         return self.title
@@ -69,6 +75,9 @@ class ArticleImage(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     # image
     image = models.ImageField(upload_to='articles/%Y/%m/%d')
+
+    class Meta:
+        app_label = 'articles'
 
     def __str__(self):
         return self.title
