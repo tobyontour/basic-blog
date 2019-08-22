@@ -23,11 +23,11 @@
 <div class="col-lg-8 col-md-10 body">
   {{ body |markdown }}
 </div>
+{% if article.tags %}
 <div class="col-lg-2 col-md-1">
-  {% if article.tags %}
   {% tag_list article.tags %}
-  {% endif %}
 </div>
+{% endif %}
 {% if DISQUS_SHORTNAME %}
   {% include "articles/disqus.html" with disqus_shortname="DISQUS_SHORTNAME" %}
 {% endif %}

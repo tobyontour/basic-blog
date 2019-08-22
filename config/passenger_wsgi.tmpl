@@ -11,12 +11,11 @@ project_location = cwd + '/config'
 sys.path.insert(0, project_location)
 
 #Switch to new python
-if sys.version < "2.7.3": os.execl("/home/%(SHELL_USER)s/%(DOMAIN)s/env/bin/python",
-    "python2.7.3", *sys.argv)
+if sys.version < "3.7.3": os.execl("/home/%(SHELL_USER)s/%(DOMAIN)s/env/bin/python", "python3.7.3", *sys.argv)
 
 sys.path.insert(0,'/home/%(SHELL_USER)s/%(DOMAIN)s/env/bin')
-sys.path.insert(0,'/home/%(SHELL_USER)s/%(DOMAIN)s/env/lib/python2.7/site-packages/django')
-sys.path.insert(0,'/home/%(SHELL_USER)s/%(DOMAIN)s/env/lib/python2.7/site-packages')
+#sys.path.insert(0,'/home/%(SHELL_USER)s/%(DOMAIN)s/env/lib/python3.7/site-packages/django')
+sys.path.insert(0,'/home/%(SHELL_USER)s/%(DOMAIN)s/env/lib/python3.7/site-packages')
 
 os.environ['DJANGO_SETTINGS_MODULE'] = "config.settings.live"
 
