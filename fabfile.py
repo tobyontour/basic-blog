@@ -1,115 +1,178 @@
+import fabric
+import re
+import io
+import subprocess
+import datetime
+import json
+
+from fabric import Connection, task
+from string import Template
+
+# c = Connection(host='george-walton.dreamhost.com', user='tobyontour')
+base_dir = 'opt2'
+python_version = '3.8.2'
+site_dir = 'test.stubside.com'
+project_dir = 'live'
+local = Connection(host='localhost')
+
+passenger_template = '''\
+import sys, os
+INTERP = "$interp"
+#INTERP is present twice so that the new python interpreter
+#knows the actual executable path
+if sys.executable != INTERP: os.execl(INTERP, INTERP, *sys.argv)
+
+cwd = os.getcwd()
+sys.path.append(cwd)
+sys.path.append(cwd + '/live')
+
+sys.path.insert(0, cwd + '/venv/bin')
+sys.path.insert(0, cwd + '/venv/lib/python$pythonmajorversion/site-packages')
+
+os.environ['DJANGO_SETTINGS_MODULE'] = "config.settings.live"
+
+os.environ["DB_NAME"] = "$DB_NAME"
+os.environ["DB_USER"] = "$DB_USER"
+os.environ["DB_PASS"] = "$DB_PASS"
+os.environ["DB_HOST"] = "mysql.$DOMAIN_NAME"
+os.environ["SECRET_KEY"] = "$SECRET_KEY"
+os.environ["ALLOWED_HOSTS"] = "$DOMAIN_NAME"
+os.environ["SITENAME"] = "$DOMAIN_NAME"
+
+
+os.environ['DJANGO_SETTINGS_MODULE'] = "config.settings.live"
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
 '''
-Deployment fabric script
 
-Dreamhost settings helped by:
-    http://dr-tom-walker.blogspot.co.uk/2013/02/deploy-django-14-and-python-273-within.html
-'''
+def is_file(c, path):
+    return c.run('test -e ' + path, warn=True)
 
-from fabric.api import local
-from fabric.contrib.files import upload_template
-from fabric.context_managers import shell_env
-from fabric.api import run, local, hosts, cd, env
+def is_dir(c, path):
+    return c.run('test -d ' + path, warn=True)
 
-import json, fabric
+def local(*args):
+    process = subprocess.run(args,
+                            stdout=subprocess.PIPE,
+                            universal_newlines=True)
+    if process.returncode == 0:
+        return process.stdout.rstrip()
+    else:
+        return False
 
+@task
+def install_python(c):
+    install_dir = c.run('pwd').stdout.rstrip() + '/opt2/python-' + python_version
 
-def run_tests():
-    local("make test")
+    if not is_dir(c, base_dir):
+        c.run('mkdir ' + base_dir)
 
-def _get_config(key="live"):
+    with c.cd(base_dir):
+        if is_file(c, 'bin/python3'):
+            return
+
+        if not is_dir(c, 'tmp'):
+            c.run('mkdir tmp')
+
+        with c.cd('tmp'):
+            if not is_file(c, 'Python-' + python_version + '.tgz'):
+                c.run('wget https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz')
+
+            if not is_dir(c, 'Python-' + python_version):
+                c.run('tar -zxvf Python-3.8.1.tgz')
+
+            with c.cd('Python-' + python_version):
+                c.run('bash configure --prefix=' + install_dir)
+                c.run('make')
+                c.run('make install')
+
+@task
+def passenger_restart(c):
+    with c.cd(project_dir):
+        c.run('touch tmp/restart.txt')
+
+@task
+def check_for_python(c):
+    result = c.run('which python3', warn=True)
+    if result.ok:
+        return result.stdout.rstrip()
+    else:
+        return False
+
+def check_python_version(c):
+    return c.run('python3 --version').stdout.rstrip()
+
+def load_secrets():
     with open("secrets.json") as f:
-        data = json.loads(f.read())
+        return json.loads(f.read())
 
-    for k in [key, "project", "gituser", "sitename"]:
-        if k not in data:
-            raise Exception("Key '%(key)s' not in %(filename)s" % {'key': k, 'filename': "secrets.json"})
-    secrets = data[key]
-    env.user = secrets['SHELL_USER']
-    env.hosts = [secrets['DOMAIN']]
+def get_passenger_file(c, secrets):
 
-    missing = []
-    for k in ["SECRET_KEY", "SHELL_USER", "DOMAIN", "DB_NAME", "DB_USER", "DB_PASS", "DB_HOST"]:
-        if k not in secrets or len(secrets[k]) == 0:
-            missing.append(k)
-    if missing:
-        raise Exception("Missing values in secrets.json: " + ", ".join(missing))
+    t = Template(passenger_template)
+    passenger = t.substitute(
+        interp = check_for_python(c),
+        pythonmajorversion = re.search(' 3.[0-9]+', check_python_version(c)).group().lstrip(' '),
+        DB_NAME = secrets['DB_NAME'],
+        DB_USER = secrets['DB_USER'],
+        DB_PASS = secrets['DB_PASS'],
+        DOMAIN_NAME = secrets['DOMAIN_NAME'],
+        SECRET_KEY = secrets['SECRET_KEY']
+    )
+    return io.StringIO(passenger)
 
-    secrets['project'] = data['project']
-    secrets['gituser'] = data['gituser']
-    secrets['sitename'] = data['sitename']
-    secrets['venv'] = "/home/%s/%s/env" % (secrets['SHELL_USER'], secrets['DOMAIN'])
-    secrets['settings'] = 'config.settings.%(key)s' % {'key': key}
-    return secrets
 
-def test():
-    global secrets
-    secrets = _get_config('test')
-    secrets['RELEASE'] = 'test'
+@task
+def make_release(c):
+    ref='HEAD'
+    local('git', 'archive', '--prefix=release/', '-o', 'release.tar.gz', ref)
 
-def live():
-    global secrets
-    secrets = _get_config('live')
-    secrets['RELEASE'] = 'live'
+@task
+def deploy(c):
 
-def setup_python_dreamhost():
-    '''
-    Install a custom version of python. This version can be reused in future by other sites.
-    '''
-    # Install python
-    if not fabric.contrib.files.exists("Python-2.7.3"):
-        run("wget http://www.python.org/ftp/python/2.7.3/Python-2.7.3.tgz")
-        run("tar zxf Python-2.7.3.tgz")
-        run("rm Python-2.7.3.tgz")
-        with cd("Python-2.7.3"):
-            # --prefix is where it will be installed
-            run("./configure --prefix=$HOME/Python27")
-            run("make")
-            run("make install")
+    secrets = load_secrets()
 
-    if not fabric.contrib.files.exists("/home/%(shell_user)s/bin" % {'shell_user': secrets['SHELL_USER']}):
-        # To install pip, we also have to install easy_install:
-        run("wget http://peak.telecommunity.com/dist/ez_setup.py")
-        run("python ez_setup.py")
+    # Check for site dir
+    if not is_dir(c, site_dir):
+        print('Site dir does not exist. Quitting.')
+        return
 
-        run("PYTHONPATH=/home/%(shell_user)s/bin easy_install --install-dir=/home/%(shell_user)s/bin pip" % {'shell_user': secrets['SHELL_USER']})
+    # Check for python
+    if not check_for_python(c):
+        install_python(c)
 
-def setup_venv():
-    venv = "/home/%s/%s/env" % (secrets['SHELL_USER'], secrets['DOMAIN'])
+    # Transfer files
+    with c.cd(site_dir):
+        if is_dir(c, site_dir + '/release'):
+            c.run('mv release ' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-release"))
+        c.put('release.tar.gz', site_dir + '/')
 
-    if not fabric.contrib.files.exists(venv): 
-        run("PYTHONPATH=/home/%(shell_user)s/bin pip install virtualenv" % {'shell_user': secrets['SHELL_USER']})
-        run("PYTHONPATH=/home/%(shell_user)s/bin virtualenv %(venv)s" % {'shell_user': secrets['SHELL_USER'], 'venv': venv})
+        c.run('tar xzf release.tar.gz ')
 
-def setup_passenger():
-    with cd("/home/%s/%s" % (secrets['SHELL_USER'], secrets['DOMAIN'])):
-        upload_template("config/passenger_wsgi.tmpl", 
-                        "passenger_wsgi.py",
-                        secrets,
-                        backup=False)    
+        c.put(get_passenger_file(c, secrets), site_dir + '/passenger_wsgi.py')
 
-def createsuperuser():
-    context = secrets
-    with cd("/home/%(SHELL_USER)s/%(DOMAIN)s" % context):
-        with shell_env(SECRET_KEY=context['SECRET_KEY'], DB_NAME=context['DB_NAME'], DB_USER=context['DB_USER'], DB_PASS=context['DB_PASS'], DB_HOST=context['DB_HOST']):
-            run("PYTHONPATH=%(venv)s/bin:/home/%(SHELL_USER)s/%(DOMAIN)s/%(project)s %(venv)s/bin/django-admin createsuperuser --settings=%(settings)s" % context)
+    # Check for virtualenv
+    with c.cd(site_dir):
+        if not is_dir(c, site_dir + '/venv'):
+            c.run('virtualenv venv --python=python3')
 
-def deploy(server='test'):
-    run_tests()
-    setup_python_dreamhost()
-    setup_venv()
-    setup_passenger()
-    context = secrets
-    with cd("/home/%(SHELL_USER)s/%(DOMAIN)s" % context):
-        # Make sure that the media directory exists
-        run("mkdir -p public/media")
-        run("mkdir -p public/static")
-        run("mkdir -p cache")
-        run("rm -rf %(project)s" % context)
-        # run("git clone https://%(gituser)s@bitbucket.org/%(gituser)s/%s(project)" % context)
-        run("git clone git://github.com/%(gituser)s/%(project)s.git" % context)
-        run("%(venv)s/bin/pip install -r basic-blog/requirements.txt --allow-external mysql-connector-python" % context)
+        # Update requirements
+        # c.run('venv/bin/pip install -r release/requirements.txt')
 
-        run("SECRET_KEY=%(SECRET_KEY)s %(venv)s/bin/python %(project)s/manage.py collectstatic --noinput --settings=%(settings)s" % context)
-        with shell_env(DB_NAME=context['DB_NAME'], DB_USER=context['DB_USER'], DB_PASS=context['DB_PASS'], DB_HOST=context['DB_HOST']):
-            run("SECRET_KEY=%(SECRET_KEY)s %(venv)s/bin/python %(project)s/manage.py migrate --settings=%(settings)s" % context)
-        run("pkill python")
+    # Public dir
+    with c.cd(site_dir):
+        c.run("mkdir -p public/media")
+        c.run("mkdir -p public/static")
+        c.run("mkdir -p cache")
+
+    with c.cd(site_dir):
+        c.run('rm live', warn=True)
+        c.run('ln -s release live')
+
+    with c.cd(site_dir):
+        c.put('secrets.json', site_dir + '/secrets.json')
+        c.run("venv/bin/python live/manage.py collectstatic --noinput --settings=config.settings.live")
+        # c.run("venv/bin/python live/manage.py migrate --settings=config.settings.live")
+
+    # Restart
+    c.run('mkdir -p tmp')
+    c.run('touch tmp/restart.txt')

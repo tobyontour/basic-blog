@@ -1,15 +1,18 @@
 from .base import *
 
-import os
+import os, json
+
+with open(BASE_DIR + '/secrets.json') as f:
+    secrets = json.loads(f.read())
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mysql.connector.django',   # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.environ.get('DB_NAME'),  # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.mysql',   # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': secrets['DB_NAME'],  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASS'),
-        'HOST': os.environ.get('DB_HOST', ''),  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'USER': secrets['DB_USER'],
+        'PASSWORD': secrets['DB_PASS'],
+        'HOST': secrets['DB_HOST'],  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                             # Set to empty string for default.
     }
 }
@@ -37,4 +40,4 @@ STATIC_ROOT = BASE_DIR + '/../public/static/'
 MEDIA_ROOT = BASE_DIR + '/../public/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = secrets['SECRET_KEY']
