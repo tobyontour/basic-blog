@@ -8,9 +8,7 @@ import json
 from fabric import Connection, task
 from string import Template
 
-# c = Connection(host='george-walton.dreamhost.com', user='tobyontour')
-base_dir = 'opt2'
-python_version = '3.8.2'
+python_version = '3.8.1'
 project_dir = 'live'
 
 passenger_template = '''\
@@ -51,7 +49,8 @@ def local(*args):
 
 @task
 def install_python(c):
-    install_dir = c.run('pwd').stdout.rstrip() + '/opt2/python-' + python_version
+    install_dir = c.run('pwd').stdout.rstrip() + '/opt/python-' + python_version
+    base_dir = 'opt2'
 
     if not is_dir(c, base_dir):
         c.run('mkdir ' + base_dir)
@@ -65,20 +64,15 @@ def install_python(c):
 
         with c.cd('tmp'):
             if not is_file(c, 'Python-' + python_version + '.tgz'):
-                c.run('wget https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tgz')
+                c.run(f"wget https://www.python.org/ftp/python/{python_version}/Python-{python_version}.tgz")
 
             if not is_dir(c, 'Python-' + python_version):
-                c.run('tar -zxvf Python-3.8.1.tgz')
+                c.run(f"tar -zxvf Python-{python_version}.tgz")
 
             with c.cd('Python-' + python_version):
                 c.run('bash configure --prefix=' + install_dir)
                 c.run('make')
                 c.run('make install')
-
-@task
-def passenger_restart(c):
-    with c.cd(project_dir):
-        c.run('touch tmp/restart.txt')
 
 @task
 def check_for_python(c):
@@ -97,6 +91,7 @@ def load_secrets():
     for k in ['DB_NAME', 'DB_USER', 'DB_PASS', 'DB_HOST', 'SECRET_KEY', 'ALLOWED_HOSTS', 'SITE_DIR']:
         if k not in data:
             raise Exception("Key '%(key)s' not in %(filename)s" % {'key': k, 'filename': "secrets.json"})
+    return data
 
 def get_passenger_file(c, secrets):
 
@@ -145,7 +140,7 @@ def deploy(c):
 
     # Check for virtualenv
     with c.cd(site_dir):
-        if not is_dir(c, site_dir + '/venv'):
+        if not is_dir(c, 'venv'):
             c.run('virtualenv venv --python=python3')
 
         # Update requirements

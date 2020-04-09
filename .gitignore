@@ -10,3 +10,4 @@ db.sqlite
 .coverage
 secrets.json
 cache
+.vscode
