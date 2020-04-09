@@ -11,9 +11,7 @@ from string import Template
 # c = Connection(host='george-walton.dreamhost.com', user='tobyontour')
 base_dir = 'opt2'
 python_version = '3.8.2'
-site_dir = 'test.stubside.com'
 project_dir = 'live'
-local = Connection(host='localhost')
 
 passenger_template = '''\
 import sys, os
@@ -30,17 +28,8 @@ sys.path.insert(0, cwd + '/venv/bin')
 sys.path.insert(0, cwd + '/venv/lib/python$pythonmajorversion/site-packages')
 
 os.environ['DJANGO_SETTINGS_MODULE'] = "config.settings.live"
+os.environ['ALLOWED_HOSTS'] = "$DOMAIN_NAME"
 
-os.environ["DB_NAME"] = "$DB_NAME"
-os.environ["DB_USER"] = "$DB_USER"
-os.environ["DB_PASS"] = "$DB_PASS"
-os.environ["DB_HOST"] = "mysql.$DOMAIN_NAME"
-os.environ["SECRET_KEY"] = "$SECRET_KEY"
-os.environ["ALLOWED_HOSTS"] = "$DOMAIN_NAME"
-os.environ["SITENAME"] = "$DOMAIN_NAME"
-
-
-os.environ['DJANGO_SETTINGS_MODULE'] = "config.settings.live"
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 '''
@@ -104,7 +93,10 @@ def check_python_version(c):
 
 def load_secrets():
     with open("secrets.json") as f:
-        return json.loads(f.read())
+        data = json.loads(f.read())
+    for k in ['DB_NAME', 'DB_USER', 'DB_PASS', 'DB_HOST', 'SECRET_KEY', 'ALLOWED_HOSTS', 'SITE_DIR']:
+        if k not in data:
+            raise Exception("Key '%(key)s' not in %(filename)s" % {'key': k, 'filename': "secrets.json"})
 
 def get_passenger_file(c, secrets):
 
@@ -130,6 +122,7 @@ def make_release(c):
 def deploy(c):
 
     secrets = load_secrets()
+    site_dir = secrets['SITE_DIR']
 
     # Check for site dir
     if not is_dir(c, site_dir):
@@ -156,7 +149,7 @@ def deploy(c):
             c.run('virtualenv venv --python=python3')
 
         # Update requirements
-        # c.run('venv/bin/pip install -r release/requirements.txt')
+        c.run('venv/bin/pip install -r release/requirements.txt')
 
     # Public dir
     with c.cd(site_dir):
@@ -174,5 +167,5 @@ def deploy(c):
         # c.run("venv/bin/python live/manage.py migrate --settings=config.settings.live")
 
     # Restart
-    c.run('mkdir -p tmp')
-    c.run('touch tmp/restart.txt')
+    c.run('mkdir -p ' + site_dir + '/tmp')
+    c.run('touch ' + site_dir + '/tmp/restart.txt')
