@@ -2,7 +2,7 @@ from .base import *
 
 import os, json
 
-with open(BASE_DIR + '/secrets.json') as f:
+with open(BASE_DIR + '/../secrets.json') as f:
     secrets = json.loads(f.read())
 
 DATABASES = {
