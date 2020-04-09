@@ -4,6 +4,7 @@
 
 import os
 import sys
+from datetime import datetime
 from django.core.urlresolvers import reverse_lazy
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/../..'
@@ -260,7 +261,7 @@ MARKDOWN_DEUX_STYLES = {
 }
 
 SITE_NAME = os.environ.get('SITENAME', 'A blog site')
-SITE_COPYRIGHT = '&copy; 2015 ' + SITE_NAME
+SITE_COPYRIGHT = '&copy; ' + datetime.today().strftime("%Y") + ' ' + SITE_NAME
 LOGIN_REDIRECT_URL = reverse_lazy('profile')
 
 TESTING = 'test' in sys.argv
