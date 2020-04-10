@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('pub_date', models.DateTimeField(auto_now=True)),
                 ('published', models.BooleanField(default=False)),
                 ('is_page', models.BooleanField(default=False)),
-                ('author', models.ForeignKey(editable=False, to=settings.AUTH_USER_MODEL)),
+                ('author', models.ForeignKey(editable=False, to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL)),
             ],
         ),
         migrations.CreateModel(
@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=100)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('image', models.ImageField(upload_to=b'articles/%Y/%m/%d')),
-                ('article', models.ForeignKey(related_name='images', to='articles.Article')),
+                ('article', models.ForeignKey(related_name='images', to='articles.Article', on_delete=models.SET_NULL)),
             ],
         ),
         migrations.CreateModel(

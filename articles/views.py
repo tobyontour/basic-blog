@@ -6,10 +6,10 @@ from django import forms
 from django.utils.text import slugify
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render_to_response, render
+from django.shortcuts import get_object_or_404, render
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.views.decorators.cache import cache_page, never_cache
 from django.template import RequestContext, loader
@@ -72,7 +72,7 @@ class ArticleForm(ModelForm):
 
     def save(self, force_insert=False, force_update=False, commit=True):
         article = super(ArticleForm, self).save(commit=True)  # have to save to access article.tags
-     
+
         # Get the tags we want
         tags_text_list = self.cleaned_data['tags_text']
 
@@ -103,7 +103,7 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         messages.add_message(self.request, messages.INFO, 'Article saved')
-        form.instance.author = self.request.user 
+        form.instance.author = self.request.user
         return super(ArticleCreateView, self).form_valid(form)
 
 class ArticleUpdateView(LoginRequiredMixin, UpdateView):
@@ -130,9 +130,9 @@ class ArticleView(DetailView):
     def get_queryset(self):
         queryset = super(ArticleView, self).get_queryset()
 
-        if not self.request.user.is_authenticated():
+        if not self.request.user.is_authenticated:
             queryset = queryset.filter(published=True)
-        
+
         return queryset.filter(is_page=False)
 
     def get_context_data(self, **kwargs):
@@ -148,7 +148,7 @@ class ArticleView(DetailView):
         for i in image_ids:
             body = body.replace('{image:%d}' % i, '![%s](%s)' % (images[i].title, images[i].image.url))
 
-        context['body'] = body 
+        context['body'] = body
         context['header_image'] = context[self.context_object_name].image
         return context
 

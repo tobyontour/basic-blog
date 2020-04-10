@@ -1,4 +1,4 @@
-{% load staticfiles %}
+{% load static %}
 {% load thumbnail %}
 {% load bootstrap3 %}
 <html>
@@ -62,11 +62,11 @@
             <li><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></li>
             {% endfor %}
             {% if user.is_authenticated %}
-            <li><a href="{% url 'profile' %}">{{ user.username }}</a></li>
+            <li><a href="{% url 'accounts:profile' %}">{{ user.username }}</a></li>
             <li><a href="{% url 'articles:new' %}">New article</a></li>
-            <li><a href="{% url 'logout' %}">Sign out</a></li>
+            <li><a href="{% url 'accounts:logout' %}">Sign out</a></li>
             {% else %}
-            <li><a href="{% url 'login' %}">Sign in</a></li>
+            <li><a href="{% url 'accounts:login' %}">Sign in</a></li>
             {% endif %}
           </ul>
         </div>
@@ -82,7 +82,7 @@
       rgba(0, 0, 0, 0.4)
     ),
     {% if header_image %}{% thumbnail header_image "1900x492" as im %}url('{{ im.url }}'){% endthumbnail %}
-    {% else %}url('{% static "img/home-bg.jpg" %}'){% endif %}"> 
+    {% else %}url('{% static "img/home-bg.jpg" %}'){% endif %}">
       <div class="container">
         <div class="row">
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

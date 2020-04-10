@@ -18,7 +18,8 @@ collectstatic:
 
 test:
 	find cache -name "*.djcache" -delete || true
-	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py test $(APPS) --settings=$(SETTINGS) --failfast
+	find . -name "*.pyc" -delete || true
+	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py test $(APPS) --settings=config.settings.test --failfast
 
 citest:
 	find cache -name "*.djcache" -delete || true

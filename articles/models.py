@@ -3,13 +3,15 @@ import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.text import slugify
-from django.utils.encoding import python_2_unicode_compatible
 from django import forms
+from django.core.cache import caches
+from django.db.models.signals import post_save, post_delete
+
+cache = caches['default']
 
 
-@python_2_unicode_compatible
 class ArticleTag(models.Model):
     title = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=50, blank=False, unique=True)
@@ -23,10 +25,9 @@ class ArticleTag(models.Model):
     def clean(self):
         self.slug = slugify(self.title)
 
-@python_2_unicode_compatible
 class Article(models.Model):
     # author
-    author = models.ForeignKey(User, editable=False)
+    author = models.ForeignKey(User, editable=False, on_delete=models.SET_NULL, null=True)
     # title
     title = models.CharField(max_length=100)
     subheading = models.CharField(max_length=100, blank=True)
@@ -63,13 +64,11 @@ class Article(models.Model):
         if self.slug == "":
             self.slug = slugify(self.title)
 
-    
-
 class ArticleAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug" : ("title",)}
 
 class ArticleImage(models.Model):
-    article = models.ForeignKey(Article, related_name='images')
+    article = models.ForeignKey(Article, related_name='images', on_delete=models.CASCADE)
     # title
     title = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
@@ -86,3 +85,27 @@ class ArticleImage(models.Model):
         return reverse('articles:image-view', args=[self.pk])
 
 
+# from .models import Article
+
+def menu_for_pages(request):
+    '''
+    Provides a list of static pages for the menu
+    '''
+    data = cache.get('menu_for_pages')
+    if data is None:
+        data = {
+            'menu_pages': Article.objects.filter(published=True).filter(is_page=True).exclude(slug__in=['home','articles'])
+        }
+        cache.set('menu_for_pages', data, 300)
+    return data
+
+def articles_changed(sender, **kwargs):
+    '''
+    Flushes the page cache when a page is saved
+    '''
+    instance = kwargs['instance']
+    if instance.published and instance.is_page and instance.slug not in ['home', 'articles']:
+        cache.delete('menu_for_pages')
+
+post_save.connect(articles_changed, sender=Article)
+post_delete.connect(articles_changed, sender=Article)

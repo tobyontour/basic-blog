@@ -5,7 +5,8 @@
 import os
 import sys
 from datetime import datetime
-from django.core.urlresolvers import reverse_lazy
+# from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/../..'
 
@@ -91,7 +92,7 @@ STATICFILES_FINDERS = (
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -99,7 +100,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
 )
 
 ROOT_URLCONF = 'config.urls'
@@ -121,15 +125,15 @@ TEMPLATES = [
         'OPTIONS': {
             # 'allowed_include_roots': settings.ALLOWED_INCLUDE_ROOTS,
             'context_processors': (
-                'django.core.context_processors.debug',
-                'django.core.context_processors.i18n',
-                'django.core.context_processors.media',
-                'django.core.context_processors.static',
+                # 'django.core.context_processors.debug',
+                # 'django.core.context_processors.i18n',
+                # 'django.core.context_processors.media',
+                # 'django.core.context_processors.static',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.request',
+                # 'django.core.context_processors.request',
                 'config.views.site_metadata_processor',
-                'articles.menu_for_pages',
+                # 'articles.menu_for_pages',
             ),
             'debug': DEBUG,
             'loaders': (
@@ -150,7 +154,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'markdown_deux',
@@ -262,7 +266,6 @@ MARKDOWN_DEUX_STYLES = {
 
 SITE_NAME = os.environ.get('SITENAME', 'A blog site')
 SITE_COPYRIGHT = '&copy; ' + datetime.today().strftime("%Y") + ' ' + SITE_NAME
-LOGIN_REDIRECT_URL = reverse_lazy('profile')
 
 TESTING = 'test' in sys.argv
 THUMBNAIL_DEBUG = False

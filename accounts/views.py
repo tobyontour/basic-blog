@@ -1,11 +1,11 @@
 from django.http import HttpResponseNotFound, HttpResponseRedirect
 from django import forms
 from django.shortcuts import render
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.views.decorators.cache import never_cache
 
 
@@ -24,6 +24,7 @@ class RegistrationForm(UserCreationForm):
         super(RegistrationForm, self).__init__(*args, **kwargs)
         f = self.fields.get('username')
         f.validators.append(MinLengthValidator(3))
+        f.validators.append(MaxLengthValidator(30))
 
     def clean_email(self):
         email = self.cleaned_data["email"]
@@ -52,7 +53,7 @@ def register(request):
             if form.cleaned_data['last_name']:
                 user.last_name = form.cleaned_data['last_name']
             user.save()
-            return HttpResponseRedirect(reverse('login'))
+            return HttpResponseRedirect(reverse('accounts:login'))
     else:
         form = RegistrationForm()
 

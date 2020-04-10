@@ -5,7 +5,7 @@ from django.test import TestCase
 from articles.models import Article
 from django.contrib.auth.models import User
 from articles.views import _get_images_in_text
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 class ArticleImageTest(TestCase):
@@ -105,7 +105,7 @@ class ArticleImageTest(TestCase):
                 'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'rb'),
             },
             follow=True)
-        
+
         self.assertContains(response, 'New image title')
         pk = response.context['image'].pk
         self.assertTrue(str(response.context['image']) == 'New image title')
@@ -136,7 +136,7 @@ class ArticleImageTest(TestCase):
                 'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'rb'),
             },
             follow=True)
-        
+
         self.assertContains(response, 'New image title')
         pk = response.context['image'].pk
 
@@ -159,12 +159,12 @@ class ArticleImageTest(TestCase):
                 'image': open(os.path.join(os.path.dirname(__file__), 'test_image.jpg'), 'rb'),
             },
             follow=True)
-        
+
         self.assertContains(response, 'New image title')
         pk = response.context['image'].pk
 
         self.client.logout()
- 
+
         response = self.client.get('/articles/images/%d' % pk)
         self.assertTemplateUsed(response, 'articles/article_image.html')
         self.assertContains(response, 'New image title')

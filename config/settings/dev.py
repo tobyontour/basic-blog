@@ -29,7 +29,7 @@ DEBUG_TOOLBAR_PANELS = [
     'template_timings_panel.panels.TemplateTimings.TemplateTimings',
 ]
 
-MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+MIDDLEWARE += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 
 LOGGING['loggers']['articles'] = {
     'handlers': ['console', ],
@@ -54,3 +54,5 @@ LOGGING['loggers']['articles'] = {
 #     }
 # }
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+
+ALLOWED_HOSTS = ['127.0.0.1']
