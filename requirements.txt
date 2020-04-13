@@ -15,7 +15,7 @@ Markdown==3.2.1
 markdown2==2.3.8
 mysqlclient==1.4.6
 Pillow==7.1.1
-pkg-resources==0.0.0
+# pkg-resources==0.0.0
 python-coveralls==2.9.3
 python-magic==0.4.15
 python-memcached==1.59
