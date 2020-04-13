@@ -45,5 +45,5 @@ clean:
 flush:
 	find cache -name "*.djcache" -delete
 
-deploy:
+deploy: release.tar.gz
 	venv/bin/fab -H $(DREAMHOST_CONNECTION) deploy --echo

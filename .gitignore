@@ -11,3 +11,4 @@ db.sqlite
 secrets.json
 cache
 .vscode
+release.tar.gz
