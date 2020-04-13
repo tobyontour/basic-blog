@@ -4,12 +4,17 @@ import io
 import subprocess
 import datetime
 import json
+import os
 
 from fabric import Connection, task
 from string import Template
 
 python_version = '3.8.1'
+python_install_dir = 'opt'
 project_dir = 'live'
+
+# Allow fallback to server installed version.
+allow_fallback = True
 
 passenger_template = '''\
 import sys, os
@@ -50,12 +55,11 @@ def local(*args):
 @task
 def install_python(c):
     install_dir = c.run('pwd').stdout.rstrip() + '/opt/python-' + python_version
-    base_dir = 'opt2'
 
-    if not is_dir(c, base_dir):
-        c.run('mkdir ' + base_dir)
+    if not is_dir(c, python_install_dir):
+        c.run('mkdir ' + python_install_dir)
 
-    with c.cd(base_dir):
+    with c.cd(python_install_dir):
         if is_file(c, 'bin/python3'):
             return
 
@@ -74,10 +78,26 @@ def install_python(c):
                 c.run('make')
                 c.run('make install')
 
+def get_python_path():
+    return os.path.join(python_install_dir, "opt", "python-" + python_version, "bin")
+
 @task
 def check_for_python(c):
+    if is_file(c, os.path.join(get_python_path(), 'python3')):
+        return os.path.join(get_python_path(), 'python3')
     result = c.run('which python3', warn=True)
-    if result.ok:
+    if result.ok and allow_fallback:
+        return result.stdout.rstrip()
+    else:
+        return False
+
+@task
+def check_for_virtualenv(c):
+    if is_file(c, os.path.join('.local', 'bin', 'virtualenv')):
+        return os.path.join('.local', 'bin', 'virtualenv')
+
+    result = c.run('which virtualenv', warn=True)
+    if result.ok and allow_fallback:
         return result.stdout.rstrip()
     else:
         return False
@@ -107,11 +127,15 @@ def get_passenger_file(c, secrets):
     )
     return io.StringIO(passenger)
 
-
 @task
 def make_release(c):
     ref='HEAD'
     local('git', 'archive', '--prefix=release/', '-o', 'release.tar.gz', ref)
+
+@task
+def get_error_log(c):
+    secrets = load_secrets()
+    c.get(os.path.join('logs', secrets['DOMAIN_NAME'], 'https', 'error.log'), secrets['DOMAIN_NAME'] + '.error.log')
 
 @task
 def deploy(c):
@@ -127,6 +151,10 @@ def deploy(c):
     # Check for python
     if not check_for_python(c):
         install_python(c)
+
+    # Check we have virtualenv available to us.
+    if not check_for_virtualenv(c):
+        c.run('pip3 --user install virtualenv')
 
     # Transfer files
     with c.cd(site_dir):
@@ -159,7 +187,7 @@ def deploy(c):
     with c.cd(site_dir):
         c.put('secrets.json', site_dir + '/secrets.json')
         c.run("venv/bin/python live/manage.py collectstatic --noinput --settings=config.settings.live")
-        # c.run("venv/bin/python live/manage.py migrate --settings=config.settings.live")
+        c.run("venv/bin/python live/manage.py migrate --settings=config.settings.live")
 
     # Restart
     c.run('mkdir -p ' + site_dir + '/tmp')

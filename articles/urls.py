@@ -1,24 +1,20 @@
-from django.conf.urls import url
-from .views import ArticleListView, ArticleDeleteView, PageView, ArticleView, \
-                   ArticleImageCreateView, ArticleImageDeleteView, ArticleImageUpdateView,\
-                   ArticleImageView, ArticleImageListView, PageListView, ArticleUpdateView, \
-                   ArticleCreateView, ArticleTagView
-import articles.views
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    url(r'^$',                                  ArticleListView.as_view(), name='list'),
-    url(r'^new$',                               ArticleCreateView.as_view(),  name='new'),
-    url(r'^pages/(?P<slug>[a-z0-9\-]+)$',       PageView.as_view(), name='page-view'),
-    url(r'^pages/$',                            PageListView.as_view(), name='page-view'),
-    url(r'^images/$',                           ArticleImageListView.as_view(), name='image-list'),
-    url(r'^images/new$',                        ArticleImageCreateView.as_view(), name='image-new'),
-    url(r'^images/(?P<pk>[0-9]+)$',             ArticleImageView.as_view(), name='image-view'),
-    url(r'^images/(?P<pk>[0-9]+)/edit$',        ArticleImageUpdateView.as_view(), name='image-edit'),
-    url(r'^images/(?P<pk>[0-9]+)/delete$',      ArticleImageDeleteView.as_view(), name='image-delete'),
+    path('',                                   views.ArticleListView.as_view(), name='list'),
+    path('new',                                views.ArticleCreateView.as_view(),  name='new'),
+    path('pages/<slug:slug>',                  views.PageView.as_view(), name='page-view'),
+    path('pages/',                            views.PageListView.as_view(), name='page-view'),
+    path('images/',                           views.ArticleImageListView.as_view(), name='image-list'),
+    path('images/new',                        views.ArticleImageCreateView.as_view(), name='image-new'),
+    path('images/<int:pk>',             views.ArticleImageView.as_view(), name='image-view'),
+    path('images/<int:pk>/edit',        views.ArticleImageUpdateView.as_view(), name='image-edit'),
+    path('images/<int:pk>/delete',      views.ArticleImageDeleteView.as_view(), name='image-delete'),
 
-    url(r'^tags/(?P<slug>[a-z0-9\-]+)$',        ArticleTagView.as_view(), name='tag-view'),
+    path('tags/<slug:slug>',        views.ArticleTagView.as_view(), name='tag-view'),
 
-    url(r'^(?P<slug>[a-z0-9\-]+)$',             ArticleView.as_view(), name='view'),
-    url(r'^(?P<slug>[a-z0-9\-]+)/edit$',        ArticleUpdateView.as_view(), name='edit'),
-    url(r'^(?P<slug>[a-z0-9\-]+)/delete$',      ArticleDeleteView.as_view(), name='delete'),
+    path('<slug:slug>',             views.ArticleView.as_view(), name='view'),
+    path('<slug:slug>/edit',        views.ArticleUpdateView.as_view(), name='edit'),
+    path('<slug:slug>/delete',      views.ArticleDeleteView.as_view(), name='delete'),
 ]

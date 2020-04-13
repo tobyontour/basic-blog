@@ -11,7 +11,7 @@ urlpatterns = [
     url(r'^$', HomePageView.as_view(), name='home'),
 
     # Authentication
-    # url(r'^accounts/', include('accounts.urls')),
+    # url('accounts/', include('accounts.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include(('accounts.urls', 'accounts'), namespace='accounts')),
     # path('articles/', include('articles.urls')),
@@ -23,7 +23,7 @@ urlpatterns = [
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
 
-    url('pages/$', PageListView.as_view(), name='page-view'),
-    url(r'^(?P<slug>[0-9a-z-]+)$', PageView.as_view(), name='page-view'),
+    path('pages/', PageListView.as_view(), name='page-list-view'),
+    path('<slug:slug>', PageView.as_view(), name='page-view'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
