@@ -1,7 +1,11 @@
 SETTINGS=config.settings.dev
-APPS=articles accounts config
 PYTHON=venv/bin/python
 SECRET_KEY=THIS_IS_NOT_A_SECRET_REDEFINE_IN_LOCAL_MK
+
+# Put your own apps in local.mk
+APPS=articles accounts config
+# Put your own username and appropriate host in local.mk
+DREAMHOST_CONNECTION=username@somehost.dreamhost.com
 -include local.mk
 
 runserver:
@@ -41,5 +45,5 @@ clean:
 flush:
 	find cache -name "*.djcache" -delete
 
-go-live:
-	cd deploy && ansible-playbook -i inventory.ansible.yaml deploy.ansible.yaml
+deploy:
+	venv/bin/fab -H $(DREAMHOST_CONNECTION) deploy --echo
