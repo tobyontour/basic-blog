@@ -57,6 +57,7 @@
             <li>
               <a href="{% url 'home' %}">Home</a>
             </li>
+            <li><a href="{% url 'search:haystack_search' %}">Search</a></li>
             <li><a href="{% url 'articles:list' %}">Articles</a></li>
             {% for p in menu_pages %}
             <li><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></li>

@@ -29,7 +29,9 @@ DEBUG_TOOLBAR_PANELS = [
     'template_timings_panel.panels.TemplateTimings.TemplateTimings',
 ]
 
-MIDDLEWARE += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+INSTALLED_APPS += ('debug_toolbar',)
+
+MIDDLEWARE = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE
 
 LOGGING['loggers']['articles'] = {
     'handlers': ['console', ],
@@ -37,8 +39,8 @@ LOGGING['loggers']['articles'] = {
     'propagate': True,
 }
 
-# CACHES = {
-#     'default': {
+CACHES = {
+    'default': {
 #         # 'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
 #         # 'LOCATION': os.path.join(BASE_DIR, 'logs/cache'),
 #         # 'TIMEOUT': 3600,
@@ -46,13 +48,21 @@ LOGGING['loggers']['articles'] = {
 #         #     'MAX_ENTRIES': 5000,
 #         #     'CULL_FREQUENCY': 5,
 #         # }
-#         #'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
 #         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
 #         'LOCATION': [
 #             '127.0.0.1:11211',
 #         ]
-#     }
-# }
+    }
+}
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 ALLOWED_HOSTS = ['127.0.0.1']
+
+INTERNAL_IPS = [
+    # ...
+    '127.0.0.1',
+    # ...
+]
+
+SECRET_KEY = 'THIS_IS_A_TEST_SECRET_KEY'

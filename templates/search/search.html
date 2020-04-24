@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load bootstrap3 %}
+{% load markdown_deux_tags %}
+{% load crispy_forms_tags %}
+
+{% block title %}Search{% endblock %}
+{% block page_title %}Search{% endblock %}
+{% block page_subheading %}Results for "{{query}}"{% endblock %}
+
+{% block content %}
+  <form method="get" action="">
+    {% crispy form form.helper %}
+
+    {% if query %}
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      {% for result in object_list %}
+        <div class="post-preview">
+          <a href="{% url 'articles:view' result.object.slug %}">
+            <h2 class="post-title">
+              {{ result.object.title }}
+            </h2>
+            {% if result.object.subheading %}
+            <h3 class="post-subtitle">
+              {{ result.object.subheading }}
+            </h3>
+            {% endif %}
+          </a>
+          <p class="post-meta">Posted by <a href="#">{{ result.object.author }}</a> on {{ result.object.created }}</p>
+          <div class="body">{{ result.object.body | markdown | truncatewords_html:20 }}</div>
+        </div>
+        <hr>
+      {% empty %}
+        <p>No articles</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </form>
+{% endblock %}
