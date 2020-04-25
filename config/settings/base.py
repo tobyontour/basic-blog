@@ -157,12 +157,13 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'haystack',
     'markdown_deux',
+    'crispy_forms',
     'sorl.thumbnail',
     'accounts',
     'articles',
     'bootstrap3',
-    'debug_toolbar',
     'versatileimagefield',
     'config',
 )
@@ -263,6 +264,15 @@ MARKDOWN_DEUX_STYLES = {
         "safe_mode": False,
     },
 }
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+    },
+}
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 SITE_NAME = os.environ.get('SITENAME', 'A blog site')
 SITE_COPYRIGHT = '&copy; ' + datetime.today().strftime("%Y") + ' ' + SITE_NAME

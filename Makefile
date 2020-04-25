@@ -47,3 +47,6 @@ flush:
 
 deploy: release.tar.gz
 	venv/bin/fab -H $(DREAMHOST_CONNECTION) deploy --echo
+
+reindex:
+	SECRET_KEY=$(SECRET_KEY) $(PYTHON) manage.py rebuild_index --settings=$(SETTINGS)

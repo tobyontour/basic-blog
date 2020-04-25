@@ -19,6 +19,7 @@ urlpatterns = [
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url('admin/doc/', include('django.contrib.admindocs.urls')),
+    path('search', include(('search.urls', 'search'), namespace='search')),
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
@@ -27,3 +28,9 @@ urlpatterns = [
     path('<slug:slug>', PageView.as_view(), name='page-view'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

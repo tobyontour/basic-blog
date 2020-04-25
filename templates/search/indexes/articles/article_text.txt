@@ -1,0 +1,5 @@
+{{ object.title }}
+{{ object.subheading }}
+{{ object.author.get_full_name }}
+{{ object.body }}
+
