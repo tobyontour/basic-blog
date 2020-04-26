@@ -41,3 +41,7 @@ MEDIA_ROOT = BASE_DIR + '/../public/media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = secrets['SECRET_KEY']
+
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
