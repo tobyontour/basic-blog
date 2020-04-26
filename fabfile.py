@@ -145,6 +145,14 @@ def reindex(c):
         c.run("venv/bin/python live/manage.py rebuild_index --settings=config.settings.live")
 
 @task
+def index(c):
+    secrets = load_secrets()
+    site_dir = secrets['SITE_DIR']
+    with c.cd(site_dir):
+        c.run("venv/bin/python live/manage.py update_index --settings=config.settings.live")
+
+
+@task
 def deploy(c):
 
     secrets = load_secrets()
