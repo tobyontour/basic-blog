@@ -12,3 +12,4 @@ secrets.json
 cache
 .vscode
 release.tar.gz
+whoosh_index/*

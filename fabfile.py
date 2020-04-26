@@ -138,6 +138,13 @@ def get_error_log(c):
     c.get(os.path.join('logs', secrets['DOMAIN_NAME'], 'https', 'error.log'), secrets['DOMAIN_NAME'] + '.error.log')
 
 @task
+def reindex(c):
+    secrets = load_secrets()
+    site_dir = secrets['SITE_DIR']
+    with c.cd(site_dir):
+        c.run("venv/bin/python live/manage.py rebuild_index --settings=config.settings.live")
+
+@task
 def deploy(c):
 
     secrets = load_secrets()
