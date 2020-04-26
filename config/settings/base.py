@@ -270,6 +270,7 @@ HAYSTACK_CONNECTIONS = {
         'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
     },
 }
+HAYSTACK_SIGNAL_PROCESSOR = 'articles.search_indexes.ArticleOnlySignalProcessor'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
