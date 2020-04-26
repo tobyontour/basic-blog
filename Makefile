@@ -28,14 +28,14 @@ test:
 citest:
 	find cache -name "*.djcache" -delete || true
 	@# Runs tests with coverage
-	SECRET_KEY=$(SECRET_KEY) coverage run manage.py test $(APPS) --settings=$(SETTINGS)
+	SECRET_KEY=$(SECRET_KEY) coverage run manage.py test $(APPS) --settings=config.settings.test
 
 pep8:
 	flake8 $(APPS)
 
 coverage:
 	@# Runs tests and produces a coverage report
-	SECRET_KEY=$(SECRET_KEY) coverage run manage.py test $(APPS) --settings=$(SETTINGS); coverage html --omit="venv/*","*/test_*"
+	SECRET_KEY=$(SECRET_KEY) coverage run manage.py test $(APPS) --settings=config.settings.test; coverage html --omit="venv/*","*/test_*"
 
 clean:
 	find . -name "*.pyc" -delete
