@@ -4,7 +4,6 @@ from crispy_forms.layout import Submit
 from haystack.generic_views import SearchView
 from haystack.forms import SearchForm
 from haystack.query import SearchQuerySet
-from . import forms
 
 class SiteSearchView(SearchView):
     template_name = 'search/search.html'
