@@ -1,12 +1,14 @@
 from django.conf.urls import url
+from django.urls import path
 from django.contrib.auth import views
 import accounts.views
 
 
 urlpatterns = [
-    url(r'^$',                              accounts.views.profile,        name='profile'),
+    url(r'^$',                        accounts.views.redirect_view,        name='redirect'),
+    url(r'^profile',                accounts.views.profile,        name='profile'),
     url(r'^user/(?P<username>[a-z]{2,8})$', accounts.views.public_profile, name='public_profile'),
-    # url(r'^register$',                      accounts.views.register,       name='register'),
+    # url(r'^register$',            accounts.views.register,       name='register'),
 
 
     url(r'^login/$',                views.LoginView.as_view(),                   name='login'),

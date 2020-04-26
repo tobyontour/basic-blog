@@ -23,11 +23,11 @@ class AccountsTest(TestCase):
         """
         # First check for the default behavior
         response = self.client.get('/accounts/')
-        self.assertRedirects(response, '/accounts/login/?next=/accounts/')
-        response = self.client.post('/accounts/login/', data={'username': 'testuser', 'password': 'testuser', 'next': '/accounts/'}, follow=True)
+        self.assertRedirects(response, '/accounts/login/')
+        response = self.client.post('/accounts/login/', data={'username': 'testuser', 'password': 'testuser'}, follow=True)
         # last_url, status_code = response.redirect_chain[-1]
         # print(last_url)
-        self.assertRedirects(response, '/accounts/')
+        self.assertRedirects(response, '/accounts/profile/')
 
         # Check the user is logged in and there is a logout link
         self.assertContains(response, 'testuser')

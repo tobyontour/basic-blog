@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.views.decorators.cache import never_cache
+from django.shortcuts import redirect
 
 
 class RegistrationForm(UserCreationForm):
@@ -81,3 +82,10 @@ def public_profile(request, username):
         'username': profile_user.username
     }
     return render(request, 'registration/public_profile.html', context)
+
+def redirect_view(request):
+    if request.user.is_authenticated:
+        response = redirect('accounts:profile')
+    else:
+        response = redirect('accounts:login')
+    return response
