@@ -2,6 +2,17 @@
 {% load markdown_deux_tags %}
 {% load article_tags %}
 
+{% block extrahead %}
+<meta property="og:title" content="{{ article.title }}" />
+<meta property="og:type" content="article" />
+<meta property="og:article:author" content="{{ article.author }}" />
+{% if article.tags %}
+  {% for tag in article.tags.all %}
+<meta property="og:article:tag" content="{{ tag.title }}" />
+  {% endfor %}
+{% endif %}
+{% endblock %}
+
 {% block title %}{{ article.title }}{% endblock %}
 {% block page_title %}{{ article.title }}{% endblock %}
 {% if article.subheading %}

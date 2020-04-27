@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from django.urls import path
 from django.contrib.auth import views
+from django.conf import settings
 import accounts.views
 
 
@@ -21,3 +22,6 @@ urlpatterns = [
         views.PasswordResetConfirmView.as_view(),  name='password_reset_confirm'),
     url(r'^reset/done/$',           views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]
+
+if settings.ALLOW_REGISTRATION:
+    urlpatterns = urlpatterns + [url(r'^register$', accounts.views.register, name='register')]

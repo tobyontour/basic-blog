@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% load markdown_deux_tags %}
 
+{% block extrahead %}
+<meta property="og:title" content="{{ article.title }}" />
+<meta property="og:type" content="article" />
+<meta property="og:article:author" content="{{ article.author }}" />
+{% endblock %}
+
 {% block content %}
 <h1>{{ article.title }}</h1>
 {% if article.image %}

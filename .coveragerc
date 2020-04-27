@@ -2,6 +2,13 @@
 [run]
 #branch = True
 source = .
+omit =
+    venv/*
+    fabfile.py
+    config/settings/live.py
+    config/settings/dev.py
+    config/wsgi.py
+    manage.py
 
 [report]
 # Regexes for lines to exclude from consideration

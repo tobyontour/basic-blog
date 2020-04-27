@@ -54,6 +54,10 @@ class ArticleTest(TestCase):
         self.assertContains(response, 'New article')
         self.assertContains(response, 'New article body')
 
+        self.assertContains(response, '<meta property="og:title" content="New article" />')
+        self.assertContains(response, '<meta property="og:type" content="article" />')
+        self.assertContains(response, '<meta property="og:article:author" content="testuser" />')
+
     def test_create_article_with_images(self):
         # Setup
         self.client.login(username="testuser", password="testuser")

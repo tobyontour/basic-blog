@@ -35,3 +35,5 @@ MEDIA_ROOT = BASE_DIR + '/../public/media/'
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 MIDDLEWARE += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+
+ALLOW_REGISTRATION = True
