@@ -19,7 +19,7 @@ fabric==2.5.0
 idna==2.9
 invoke==1.4.1
 Markdown==3.2.1
-markdown2==2.3.8
+markdown2==2.4.0
 mysqlclient==1.4.6
 paramiko==2.7.1
 Pillow==8.1.1
