@@ -5,7 +5,7 @@ cffi==1.14.0
 chardet==3.0.4
 coverage==5.0.4
 cryptography==3.3.2
-Django==3.0.14
+Django==3.1.9
 django-bootstrap3==12.0.3
 django-braces==1.14.0
 django-crispy-forms==1.9.0
