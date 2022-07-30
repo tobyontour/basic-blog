@@ -1,4 +1,4 @@
-asgiref==3.2.7
+asgiref==3.2.10
 bcrypt==3.1.7
 certifi==2020.4.5.1
 cffi==1.14.0
@@ -20,7 +20,7 @@ idna==2.9
 invoke==1.4.1
 Markdown==3.2.1
 markdown2==2.4.0
-mysqlclient==1.4.6
+#mysqlclient==2.1.1
 paramiko==2.10.1
 Pillow==9.0.1
 pycparser==2.20
@@ -30,7 +30,7 @@ python-magic==0.4.15
 python-memcached==1.59
 pytz==2019.3
 PyYAML==5.4
-requests==2.23.0
+requests
 six==1.14.0
 sorl-thumbnail==12.6.3
 sqlparse==0.3.1
