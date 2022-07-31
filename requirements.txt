@@ -20,7 +20,7 @@ idna==2.9
 invoke==1.4.1
 Markdown==3.2.1
 markdown2==2.4.0
-#mysqlclient==2.1.1
+mysqlclient==2.1.1
 paramiko==2.10.1
 Pillow==9.0.1
 pycparser==2.20
