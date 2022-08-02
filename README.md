@@ -1,6 +1,6 @@
 # basic-blog
 
-![Build status](https://github.com/tobyontour/basic-blog/actions/workflows/python-package.yml/badge.svg)
+![Build status](https://github.com/tobyontour/basic-blog/actions/workflows/django.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/tobyontour/basic-blog/badge.svg?branch=master)](https://coveralls.io/r/tobyontour/basic-blog?branch=master)
 
 A basic blog site in Django
